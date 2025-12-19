@@ -1,0 +1,122 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px);
+  padding: 20px;
+}
+
+.auth-box {
+  background: #fff;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  padding: 40px;
+  width: 100%;
+  max-width: 350px;
+  text-align: center;
+}
+
+.auth-logo {
+  font-family: 'Lobster', cursive;
+  font-size: 40px;
+  margin-bottom: 20px;
+}
+
+.auth-subtitle {
+  color: #8e8e8e;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-form input {
+  padding: 10px;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  font-size: 14px;
+  background: #fafafa;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: #a8a8a8;
+}
+
+.auth-form button {
+  margin-top: 8px;
+  padding: 10px;
+  background: #0095f6;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-form button:disabled {
+  opacity: 0.5;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #dbdbdb;
+}
+
+.divider span {
+  padding: 0 16px;
+  color: #8e8e8e;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.kakao-login-btn {
+  width: 100%;
+  padding: 10px;
+  background: #fee500;
+  color: #000;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.kakao-icon {
+  background: #000;
+  color: #fee500;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.auth-link {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #8e8e8e;
+}
+
+.auth-link a {
+  color: #0095f6;
+  font-weight: 600;
+}
