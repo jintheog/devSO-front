@@ -63,6 +63,7 @@ export const deletePost = (id) => api.delete(`/api/posts/${id}`);
 export const getProfile = (username) => api.get(`/api/users/${username}`);
 export const updateProfile = (username, data) => api.put(`/api/users/${username}`, data);
 export const getUserPosts = (username) => api.get(`/api/users/${username}/posts`);
+export const searchUsers = (query) => api.get(`/api/users/search?q=${query}`);
 
 // 댓글 API
 export const getComments = (postId) => api.get(`/api/posts/${postId}/comments`);
@@ -91,5 +92,11 @@ export const uploadFile = (file) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
+
+// 채팅 API
+export const getMyChatRooms = () => api.get('/api/chat/rooms');
+export const enterChatRoom = (opponentId) => api.post(`/api/chat/rooms/${opponentId}`);
+export const getChatMessages = (roomId, page = 0, size = 20) => api.get(`/api/chat/rooms/${roomId}/messages?page=${page}&size=${size}`);
+export const markChatAsRead = (roomId) => api.post(`/api/chat/rooms/${roomId}/read`);
 
 export default api;

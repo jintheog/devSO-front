@@ -37,6 +37,9 @@ export default function RootLayout() {
             <NavLink to="/profile" style={navLinkStyle}>
               프로필
             </NavLink>
+            <NavLink to="/chat" style={navLinkStyle}>
+              채팅
+            </NavLink>
             <button onClick={logout} style={logoutButtonStyle}>
               로그아웃
             </button>
