@@ -95,4 +95,6 @@ $RECYCLE.BIN/
 # .env.example 파일의 템플릿을 참고할 것
 .env
 
+.vscode/
+
 # End of https://www.toptal.com/developers/gitignore/api/react,java,visualstudiocode,windows
