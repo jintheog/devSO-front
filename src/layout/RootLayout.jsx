@@ -51,9 +51,12 @@ export default function RootLayout() {
             <NavLink to="/posts/new" style={navLinkStyle}>
               새 글 작성
             </NavLink>
-            <button onClick={logout} style={logoutButtonStyle}>
-            {/* This link now opens the chat widget */}
-            <a href="#" onClick={handleChatClick} style={navLinkStyle({ isActive: false })}>
+            {/* This link opens the chat widget */}
+            <a
+              href="#"
+              onClick={handleChatClick}
+              style={navLinkStyle({ isActive: false })}
+            >
               채팅
             </a>
             <button onClick={logout} style={buttonStyle}>
