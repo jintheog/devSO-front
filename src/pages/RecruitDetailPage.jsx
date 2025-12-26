@@ -12,6 +12,11 @@ import {
 	getContactTypes,
 	getDurationTypes,
 	getMemberCount,
+	// 🌟 댓글 관련 API 추가 가정 (api/index.js에 정의되어 있어야 함)
+	getRecruitComments,
+	createRecruitComment,
+	updateRecruitComment,
+	deleteRecruitComment,
 } from "../api";
 import { useAuth } from "../contexts/AuthContext";
 import { Icon } from "@iconify/react";
@@ -24,6 +29,11 @@ export default function RecruitDetailPage() {
 	const { user } = useAuth();
 
 	const [recruit, setRecruit] = useState(null);
+	const [comments, setComments] = useState([]); // 🌟 댓글 목록 상태
+	const [commentInput, setCommentInput] = useState(""); // 🌟 새 댓글 입력 상태
+	const [editingCommentId, setEditingCommentId] = useState(null); // 🌟 수정 중인 댓글 ID
+	const [editInput, setEditInput] = useState(""); // 🌟 수정 입력 상태
+
 	const [options, setOptions] = useState({
 		types: [],
 		positions: [],
@@ -36,9 +46,9 @@ export default function RecruitDetailPage() {
 
 	const fetchData = async () => {
 		try {
-			// 모든 Enum 데이터를 병렬로 로드
-			const [detailRes, t, p, s, pr, c, d, m] = await Promise.all([
+			const [detailRes, commentRes, t, p, s, pr, c, d, m] = await Promise.all([
 				getRecruitDetail(id),
+				getRecruitComments(id), // 🌟 댓글 로드 추가
 				getTypes(),
 				getPositions(),
 				getTechStacks(),
@@ -49,8 +59,9 @@ export default function RecruitDetailPage() {
 			]);
 
 			setRecruit(detailRes.data.data);
+			setComments(commentRes.data.data || []); // 🌟 댓글 설정
 			setOptions({
-				types: t.data, // [{value: 1, label: "스터디", key: "STUDY"}, ...]
+				types: t.data,
 				positions: p.data,
 				stacks: s.data,
 				progress: pr.data,
@@ -67,32 +78,65 @@ export default function RecruitDetailPage() {
 		if (id) fetchData();
 	}, [id]);
 
-	/**
-	 * 🌟 핵심 로직: getLabel
-	 * 서버에서 온 값(serverValue)이 숫자(1)이든 영문(HYBRID)이든
-	 * 백엔드에서 새로 추가한 key 필드와 비교하여 적절한 한글 라벨을 찾습니다.
-	 */
+	// ===== 댓글 로직 =====
+
+	// 1. 댓글 등록
+	const handleCommentSubmit = async () => {
+		if (!commentInput.trim()) return;
+		try {
+			await createRecruitComment(id, { content: commentInput });
+			setCommentInput("");
+			fetchData(); // 🌟 목록 및 카운트 갱신
+		} catch (err) {
+			alert("댓글 등록에 실패했습니다.");
+		}
+	};
+
+	// 2. 댓글 삭제
+	const handleCommentDelete = async (commentId) => {
+		if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
+		try {
+			await deleteRecruitComment(id, commentId);
+			fetchData(); // 🌟 목록 및 카운트 갱신
+		} catch (err) {
+			alert("댓글 삭제에 실패했습니다.");
+		}
+	};
+
+	// 3. 댓글 수정 모드 진입
+	const startEdit = (comment) => {
+		setEditingCommentId(comment.id);
+		setEditInput(comment.content);
+	};
+
+	// 4. 댓글 수정 실행
+	const handleCommentUpdate = async (commentId) => {
+		if (!editInput.trim()) return;
+		try {
+			await updateRecruitComment(id, commentId, { content: editInput });
+			setEditingCommentId(null);
+			fetchData();
+		} catch (err) {
+			alert("댓글 수정에 실패했습니다.");
+		}
+	};
+
+	// 기존 유틸 함수
 	const getLabel = (optionList, serverValue) => {
 		if (
 			!optionList ||
 			optionList.length === 0 ||
 			serverValue === undefined ||
 			serverValue === null
-		) {
+		)
 			return serverValue;
-		}
-
 		const found = optionList.find((o) => {
-			// 1. 숫자값 비교 (value 필드)
 			const isValueMatch = String(o.value) === String(serverValue);
-			// 2. 영문 상수명 비교 (key 필드 - 백엔드에서 p.name()으로 보낸 값)
 			const isKeyMatch =
 				o.key &&
 				String(o.key).toUpperCase() === String(serverValue).toUpperCase();
-
 			return isValueMatch || isKeyMatch;
 		});
-
 		return found ? found.label : serverValue;
 	};
 
@@ -111,7 +155,7 @@ export default function RecruitDetailPage() {
 					: prev.bookmarkCount + 1,
 			}));
 		} catch (err) {
-			console.error("북마크 처리 실패", err);
+			console.error("북마크 실패", err);
 		}
 	};
 
@@ -122,17 +166,15 @@ export default function RecruitDetailPage() {
 				alert("삭제되었습니다.");
 				navigate("/recruits", { replace: true });
 			} catch (err) {
-				alert("삭제에 실패했습니다.");
+				alert("삭제 실패");
 			}
 		}
 	};
 
-	const handleUpdate = () => {
+	const handleUpdate = () =>
 		navigate("/recruits/create", { state: { editData: recruit } });
-	};
 
 	const handleToggleStatus = async () => {
-		// OPEN 상태를 1 또는 "OPEN"으로 유연하게 체크
 		const isClosing = recruit.status === "OPEN" || recruit.status === 1;
 		if (
 			window.confirm(
@@ -144,7 +186,7 @@ export default function RecruitDetailPage() {
 				alert("상태가 변경되었습니다.");
 				fetchData();
 			} catch (err) {
-				alert("상태 변경에 실패했습니다.");
+				alert("상태 변경 실패");
 			}
 		}
 	};
@@ -152,7 +194,7 @@ export default function RecruitDetailPage() {
 	if (!recruit)
 		return (
 			<div className="text-center py-20 text-gray-500 font-medium">
-				데이터를 불러오는 중입니다...
+				데이터 로딩 중...
 			</div>
 		);
 
@@ -160,6 +202,7 @@ export default function RecruitDetailPage() {
 
 	return (
 		<div className="max-w-4xl mx-auto px-6 py-10 bg-white min-h-screen">
+			{/* 상단 헤더 및 정보 섹션은 동일하므로 생략 없이 흐름 유지 */}
 			<button
 				onClick={() => navigate(-1)}
 				className="mb-8 text-gray-400 hover:text-black transition flex items-center gap-1"
@@ -179,7 +222,6 @@ export default function RecruitDetailPage() {
 					)}
 					{recruit.title}
 				</h1>
-
 				<div className="flex justify-between items-center pb-8 border-b border-gray-50">
 					<div className="flex items-center gap-3">
 						<div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center text-lg overflow-hidden border border-yellow-50">
@@ -202,7 +244,6 @@ export default function RecruitDetailPage() {
 							</span>
 						</div>
 					</div>
-
 					{isOwner && (
 						<div className="flex gap-2">
 							<button onClick={handleUpdate} className="detail-action-btn">
@@ -227,7 +268,7 @@ export default function RecruitDetailPage() {
 				</div>
 			</header>
 
-			{/* 정보 섹션: 모든 value에 getLabel을 적용하여 치환 */}
+			{/* 정보 섹션 및 본문 섹션 유지 */}
 			<section className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-16 pb-12 border-b border-gray-50">
 				<InfoItem
 					label="모집 구분"
@@ -271,7 +312,8 @@ export default function RecruitDetailPage() {
 				</div>
 			</section>
 
-			<footer className="py-8 flex justify-between items-center">
+			{/* 북마크 및 조회수 섹션 */}
+			<footer className="py-8 flex justify-between items-center border-b border-gray-50">
 				<div className="flex items-center gap-6">
 					<span className="text-gray-400 text-sm flex items-center gap-1">
 						<Icon icon="mdi:eye-outline" width="18" height="18" />{" "}
@@ -300,19 +342,35 @@ export default function RecruitDetailPage() {
 				</div>
 			</footer>
 
+			{/* 🌟 수정/추가된 댓글 섹션 */}
 			<section className="mt-10 pb-20">
-				<h3 className="font-bold mb-6 text-gray-900 text-lg border-t border-gray-100 pt-10">
+				<h3 className="font-bold mb-6 text-gray-900 text-lg">
 					댓글{" "}
 					<span className="text-gray-400 ml-1">
 						{recruit.commentCount || 0}
 					</span>
 				</h3>
-				<div className="bg-gray-50 p-5 rounded-2xl flex items-center gap-4 border border-gray-100 shadow-sm">
-					<div className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-sm shadow-sm">
-						{user ? "😊" : "👤"}
+
+				{/* 댓글 작성란 */}
+				<div className="bg-gray-50 p-5 rounded-2xl flex items-center gap-4 border border-gray-100 shadow-sm mb-10">
+					<div className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-sm shadow-sm overflow-hidden">
+						{user?.profileImageUrl ? (
+							<img
+								src={user.profileImageUrl}
+								alt="me"
+								className="w-full h-full object-cover"
+							/>
+						) : user ? (
+							"😊"
+						) : (
+							"👤"
+						)}
 					</div>
 					<input
 						type="text"
+						value={commentInput}
+						onChange={(e) => setCommentInput(e.target.value)}
+						onKeyPress={(e) => e.key === "Enter" && handleCommentSubmit()}
 						placeholder={
 							user ? "댓글을 입력하세요..." : "로그인 후 이용 가능합니다."
 						}
@@ -320,14 +378,97 @@ export default function RecruitDetailPage() {
 						className="bg-transparent flex-1 focus:outline-none text-[15px]"
 					/>
 					<button
-						disabled={!user}
+						onClick={handleCommentSubmit}
+						disabled={!user || !commentInput.trim()}
 						className="bg-gray-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold disabled:bg-gray-200 transition"
 					>
 						등록
 					</button>
 				</div>
+
+				{/* 댓글 목록 */}
+				<div className="space-y-8">
+					{comments.map((comment) => (
+						<div key={comment.id} className="flex gap-4 group">
+							<div className="w-10 h-10 bg-gray-100 rounded-full shrink-0 overflow-hidden border border-gray-50">
+								{comment.author?.profileImageUrl ? (
+									<img
+										src={comment.author.profileImageUrl}
+										alt="p"
+										className="w-full h-full object-cover"
+									/>
+								) : (
+									<div className="w-full h-full flex items-center justify-center text-lg">
+										😊
+									</div>
+								)}
+							</div>
+
+							<div className="flex-1">
+								<div className="flex items-center justify-between mb-1.5">
+									<div className="flex items-center gap-2">
+										<span className="font-bold text-[14px] text-gray-800">
+											{comment.author?.username}
+										</span>
+										<span className="text-[12px] text-gray-400">
+											{new Date(comment.createdAt).toLocaleDateString("ko-KR")}
+										</span>
+									</div>
+
+									{/* 🌟 수정 포인트: 버튼 노출 조건 및 CSS 개선 */}
+									{comment.isOwner && editingCommentId !== comment.id && (
+										<div className="flex gap-3 transition-opacity duration-200">
+											<button
+												onClick={() => startEdit(comment)}
+												className="text-xs font-bold text-gray-400 hover:text-blue-500 transition-colors"
+											>
+												수정
+											</button>
+											<button
+												onClick={() => handleCommentDelete(comment.id)}
+												className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors"
+											>
+												삭제
+											</button>
+										</div>
+									)}
+								</div>
+
+								{editingCommentId === comment.id ? (
+									<div className="mt-2 bg-white border border-gray-200 rounded-xl p-2 shadow-sm">
+										<textarea
+											value={editInput}
+											onChange={(e) => setEditInput(e.target.value)}
+											className="w-full bg-transparent p-2 text-[15px] focus:outline-none min-h-20 resize-none"
+											placeholder="내용을 입력하세요..."
+										/>
+										<div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-50">
+											<button
+												onClick={() => setEditingCommentId(null)}
+												className="text-xs font-bold px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition"
+											>
+												취소
+											</button>
+											<button
+												onClick={() => handleCommentUpdate(comment.id)}
+												className="text-xs font-bold px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-black transition"
+											>
+												수정완료
+											</button>
+										</div>
+									</div>
+								) : (
+									<p className="text-[15px] text-gray-600 leading-relaxed whitespace-pre-wrap">
+										{comment.content}
+									</p>
+								)}
+							</div>
+						</div>
+					))}
+				</div>
 			</section>
 
+			{/* 스타일 섹션 */}
 			<style>{`
         .detail-action-btn {
           padding: 6px 14px;
