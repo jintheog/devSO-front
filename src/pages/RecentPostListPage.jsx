@@ -220,7 +220,7 @@ const RecentPostListPage = () => {
                           <span>{post.commentCount}</span>
                         </span>
                         <span className="post-card-stat-item">
-                          <span>👁️</span>
+                          <span>👁️‍🗨️</span>
                           <span>{post.viewCount || 0}</span>
                         </span>
                       </div>

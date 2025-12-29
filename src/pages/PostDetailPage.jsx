@@ -264,7 +264,7 @@ const PostDetailPage = () => {
                 <span>{post.commentCount || 0}</span>
               </span>
               <span className="post-detail-stat-item">
-                <span>👁️</span>
+                <span>👁️‍🗨️</span>
                 <span>{post.viewCount || 0}</span>
               </span>
               {isOwner && (

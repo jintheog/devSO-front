@@ -11,7 +11,7 @@ import {
   useEditor,
 } from "@tiptap/react";
 import { Extension } from "@tiptap/core";
-import { Plugin } from "@tiptap/pm/state";
+import { Plugin, TextSelection } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -55,6 +55,58 @@ const PasteMarkdown = Extension.create({
 
             // @tiptap/markdown이 제공하는 contentType: "markdown" 파싱을 이용
             this.editor.commands.insertContent(trimmed, { contentType: "markdown" });
+            return true;
+          },
+        },
+      }),
+    ];
+  },
+});
+
+// 인라인 코드: `내용` 입력 시 자동으로 code 마크로 변환 (노션/마크다운 느낌)
+// - StarterKit의 code mark를 사용
+// - "닫는 백틱(`)"을 입력하는 순간 변환되도록 handleTextInput으로 처리
+const InlineCodeBackticks = Extension.create({
+  name: "inlineCodeBackticks",
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        props: {
+          handleTextInput: (view, _from, _to, text) => {
+            if (text !== "`") return false;
+
+            const { state, dispatch } = view;
+            const { selection, schema } = state;
+            const { $from, empty } = selection;
+            if (!empty) return false;
+
+            const codeMark = schema.marks?.code;
+            if (!codeMark) return false;
+
+            // 현재 textblock(보통 paragraph) 안에서만 처리
+            const blockStart = $from.start();
+            const textBeforeCursor = state.doc.textBetween(blockStart, $from.pos, "\n", "\uFFFC");
+
+            const openIdx = textBeforeCursor.lastIndexOf("`");
+            if (openIdx < 0) return false;
+
+            const inner = textBeforeCursor.slice(openIdx + 1);
+            // 비어있거나 줄바꿈 포함이면 변환하지 않음
+            if (!inner || inner.includes("\n")) return false;
+            // 안에 백틱이 또 있으면(중첩) 변환하지 않음
+            if (inner.includes("`")) return false;
+
+            const openPos = blockStart + openIdx;
+
+            // `inner` + (현재 입력된 닫는 백틱) 을 "code mark 적용된 inner"로 치환
+            const tr = state.tr.replaceWith(
+              openPos,
+              $from.pos,
+              schema.text(inner, [codeMark.create()])
+            );
+            tr.setSelection(TextSelection.create(tr.doc, openPos + inner.length));
+
+            dispatch(tr);
             return true;
           },
         },
@@ -362,6 +414,7 @@ const PostCreatePage = () => {
       // Markdown 저장/로드를 위한 확장 (editor.getMarkdown() 제공) - HTML 붙여넣기 처리
       Markdown,
       PasteMarkdown,
+      InlineCodeBackticks,
       PasteOrDropImage, // 이미지 처리는 마지막에
     ],
     content: "",
@@ -686,6 +739,16 @@ const PostCreatePage = () => {
                 aria-pressed={isMarkActive("strike")}
               >
                 Strike
+              </button>
+              <button
+                type="button"
+                onClick={() => editor?.chain().focus().toggleCode().run()}
+                disabled={!editor}
+                className={isMarkActive("code") ? "active" : ""}
+                aria-pressed={isMarkActive("code")}
+                title="인라인 코드 (또는 `내용` 입력)"
+              >
+                Code
               </button>
               <span className="editor-divider" aria-hidden="true" />
               <button

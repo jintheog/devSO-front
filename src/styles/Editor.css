@@ -190,6 +190,31 @@
   line-height: 1.6;
 }
 
+/* 인라인 코드(`내용`) 스타일 (코드블록(pre) 안에는 적용하지 않음) */
+.editor-surface .ProseMirror p code,
+.editor-surface .ProseMirror li code,
+.editor-surface .ProseMirror blockquote code {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 0.95em;
+  color: #dc2626;
+}
+
+/* 코드블록 내부 code는 인라인 코드 스타일을 강제로 제거 */
+.editor-surface .ProseMirror pre code,
+.codeblock-pre code {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
 /* 노션처럼 언어 배지 */
 .codeblock-wrapper {
   position: relative;
