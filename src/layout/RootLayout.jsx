@@ -7,8 +7,8 @@ import ChatWidget from "../components/ChatWidget";
 
 export default function RootLayout() {
   const { isAuthenticated, logout } = useAuth();
-  const { toggleChat } = useChat();
-
+  const { toggleChat } = us
+  const 
 	const navLinkStyle = ({ isActive }) => ({
 		marginRight: "15px",
 		fontWeight: isActive ? "bold" : "normal",
@@ -86,6 +86,20 @@ export default function RootLayout() {
       {isAuthenticated && (
         <>
           <ChatBubble />
+          <ChatWidget />
+        </>
+      )}
+    </div>
+  );
+}
+ChatBubble />
+          <ChatWidget />
+        </>
+      )}
+    </div>
+  );
+}
+ChatBubble />
           <ChatWidget />
         </>
       )}
