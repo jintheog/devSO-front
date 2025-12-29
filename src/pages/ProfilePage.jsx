@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { getProfile } from "../api";
-import { getImageUrl } from "../api";
+import { getProfile, getImageUrl } from "../api";
 
 const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
 const ProfilePage = () => {
-  const { username: urlUsername } = useParams(); 
+  const { username: urlUsername } = useParams();
   const { user: currentUser, loading: authLoading } = useAuth();
-  
+
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,7 +43,7 @@ const ProfilePage = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10 font-sans">
-      {/* 1. 헤더 섹션: 아바타, 이름, 직무, 링크 */}
+      {/* 1. 헤더 섹션 */}
       <header className="bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] text-white rounded-2xl p-8 mb-8 shadow-lg flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden">
         <div className="relative z-10 shrink-0">
           <img
@@ -58,21 +57,40 @@ const ProfilePage = () => {
             {profileData.name || profileData.username}
           </h1>
           <p className="text-lg md:text-xl font-medium opacity-90">
-            {profileData.careers?.[0]?.position || "개발자"}
+            {profileData.careers?.[0]?.position || ""}
           </p>
+          
+          {/* 링크 버튼 섹션 수정됨 */}
           <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
             {profileData.portfolio && (
               <a 
-                href={profileData.portfolio.startsWith('http') ? profileData.portfolio : `mailto:${profileData.portfolio}`} 
+                href={profileData.portfolio.startsWith('http') ? profileData.portfolio : `https://${profileData.portfolio}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition-colors backdrop-blur-sm"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white text-white hover:text-[#6c5ce7] border border-white/30 rounded-lg text-sm font-bold transition-all duration-300 shadow-sm group"
               >
-                Portfolio / SNS
+                <span>Portfolio / SNS</span>
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  className="opacity-80 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                >
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
               </a>
             )}
           </div>
         </div>
+
         {isOwnProfile && (
           <button 
             className="relative z-10 mt-4 md:mt-0 px-5 py-2.5 bg-white text-[#6c5ce7] font-bold rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
@@ -84,9 +102,8 @@ const ProfilePage = () => {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column (Bio & Contact) */}
+        {/* Left Column (Bio, Contact, Skills, Certis) */}
         <div className="space-y-8 lg:col-span-1">
-          {/* 2. 자기소개 및 연락처 섹션 */}
           <section className="bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-shadow">
             <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2 border-gray-100">소개</h2>
             <p className="text-gray-600 leading-relaxed whitespace-pre-wrap mb-6">
@@ -104,7 +121,6 @@ const ProfilePage = () => {
             </div>
           </section>
 
-          {/* 3. 기술 스택 섹션 */}
           {profileData.skills?.length > 0 && (
             <section className="bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-shadow">
               <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2 border-gray-100">기술 스택</h2>
@@ -125,8 +141,7 @@ const ProfilePage = () => {
             </section>
           )}
 
-           {/* 7. 자격증 섹션 (Moved to left column for balance) */}
-           {profileData.certis?.length > 0 && (
+          {profileData.certis?.length > 0 && (
             <section className="bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-shadow">
               <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2 border-gray-100">자격증</h2>
               <div className="space-y-4">
@@ -146,7 +161,6 @@ const ProfilePage = () => {
 
         {/* Right Column (Experience, Activities, Education) */}
         <div className="space-y-8 lg:col-span-2">
-          {/* 4. 경력 섹션 */}
           {profileData.careers?.length > 0 && (
             <section className="bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-shadow">
               <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
@@ -169,7 +183,6 @@ const ProfilePage = () => {
             </section>
           )}
 
-          {/* 5. 주요 활동 섹션 */}
           {profileData.activities?.length > 0 && (
             <section className="bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-shadow">
               <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
@@ -194,7 +207,6 @@ const ProfilePage = () => {
             </section>
           )}
 
-          {/* 6. 학력 섹션 */}
           {profileData.educations?.length > 0 && (
             <section className="bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_8px_20px_rgba(0,0,0,0.12)] transition-shadow">
               <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
