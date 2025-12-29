@@ -4,18 +4,15 @@ import { useAuth } from "../contexts/AuthContext";
 import { useChat } from "../contexts/ChatContext";
 import ChatBubble from "../components/ChatBubble";
 import ChatWidget from "../components/ChatWidget";
-
 export default function RootLayout() {
   const { isAuthenticated, logout } = useAuth();
-  const { toggleChat } = us
-  const 
-	const navLinkStyle = ({ isActive }) => ({
-		marginRight: "15px",
-		fontWeight: isActive ? "bold" : "normal",
-		color: isActive ? "blue" : "black",
-		textDecoration: "none",
-	});
-
+  const { toggleChat } = useChat();
+  const navLinkStyle = ({ isActive }) => ({
+    marginRight: "15px",
+    fontWeight: isActive ? "bold" : "normal",
+    color: isActive ? "blue" : "black",
+    textDecoration: "none",
+  });
   const buttonStyle = {
     marginRight: "15px",
     fontWeight: "normal",
@@ -27,12 +24,10 @@ export default function RootLayout() {
     fontFamily: "inherit",
     fontSize: "inherit",
   };
-
   const handleChatClick = (e) => {
     e.preventDefault();
     toggleChat();
   };
-
   return (
     <div>
       <nav style={{ padding: "10px", backgroundColor: "#eee" }}>
@@ -42,15 +37,14 @@ export default function RootLayout() {
         <NavLink to="/posts" style={navLinkStyle}>
           최신
         </NavLink>
-
         {isAuthenticated ? (
           <>
             <NavLink to="/profile" style={navLinkStyle}>
               프로필
             </NavLink>
             <NavLink to="/recruits" style={navLinkStyle}>
-							팀원 모집
-						</NavLink>
+              팀원 모집
+            </NavLink>
             <NavLink to="/posts/new" style={navLinkStyle}>
               새 글 작성
             </NavLink>
@@ -77,29 +71,13 @@ export default function RootLayout() {
           </>
         )}
       </nav>
-
       <div style={{ padding: "20px" }}>
         <Outlet />
       </div>
-
       {/* Render chat components if authenticated */}
       {isAuthenticated && (
         <>
           <ChatBubble />
-          <ChatWidget />
-        </>
-      )}
-    </div>
-  );
-}
-ChatBubble />
-          <ChatWidget />
-        </>
-      )}
-    </div>
-  );
-}
-ChatBubble />
           <ChatWidget />
         </>
       )}
