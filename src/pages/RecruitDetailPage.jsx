@@ -210,7 +210,6 @@ export default function RecruitDetailPage() {
 
 	return (
 		<div className="max-w-4xl mx-auto px-6 py-10 bg-white min-h-screen">
-			{/* 상단 헤더 및 정보 섹션은 동일하므로 생략 없이 흐름 유지 */}
 			<button
 				onClick={() => navigate(-1)}
 				className="mb-8 text-gray-400 hover:text-black transition flex items-center gap-1"
@@ -540,90 +539,8 @@ export default function RecruitDetailPage() {
 						</div>
 					))}
 				</div>
-
-				{/* 댓글 목록 */}
-				<div className="space-y-8">
-					{comments.map((comment) => (
-						<div key={comment.id} className="flex gap-4 group">
-							<div className="w-10 h-10 bg-gray-100 rounded-full shrink-0 overflow-hidden border border-gray-50">
-								{comment.author?.profileImageUrl ? (
-									<img
-										src={comment.author.profileImageUrl}
-										alt="p"
-										className="w-full h-full object-cover"
-									/>
-								) : (
-									<div className="w-full h-full flex items-center justify-center text-lg">
-										😊
-									</div>
-								)}
-							</div>
-
-							<div className="flex-1">
-								<div className="flex items-center justify-between mb-1.5">
-									<div className="flex items-center gap-2">
-										<span className="font-bold text-[14px] text-gray-800">
-											{comment.author?.username}
-										</span>
-										<span className="text-[12px] text-gray-400">
-											{new Date(comment.createdAt).toLocaleDateString("ko-KR")}
-										</span>
-									</div>
-
-									{/* 🌟 수정 포인트: 버튼 노출 조건 및 CSS 개선 */}
-									{comment.isOwner && editingCommentId !== comment.id && (
-										<div className="flex gap-3 transition-opacity duration-200">
-											<button
-												onClick={() => startEdit(comment)}
-												className="text-xs font-bold text-gray-400 hover:text-blue-500 transition-colors"
-											>
-												수정
-											</button>
-											<button
-												onClick={() => handleCommentDelete(comment.id)}
-												className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors"
-											>
-												삭제
-											</button>
-										</div>
-									)}
-								</div>
-
-								{editingCommentId === comment.id ? (
-									<div className="mt-2 bg-white border border-gray-200 rounded-xl p-2 shadow-sm">
-										<textarea
-											value={editInput}
-											onChange={(e) => setEditInput(e.target.value)}
-											className="w-full bg-transparent p-2 text-[15px] focus:outline-none min-h-20 resize-none"
-											placeholder="내용을 입력하세요..."
-										/>
-										<div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-50">
-											<button
-												onClick={() => setEditingCommentId(null)}
-												className="text-xs font-bold px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition"
-											>
-												취소
-											</button>
-											<button
-												onClick={() => handleCommentUpdate(comment.id)}
-												className="text-xs font-bold px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-black transition"
-											>
-												수정완료
-											</button>
-										</div>
-									</div>
-								) : (
-									<p className="text-[15px] text-gray-600 leading-relaxed whitespace-pre-wrap">
-										{comment.content}
-									</p>
-								)}
-							</div>
-						</div>
-					))}
-				</div>
 			</section>
 
-			{/* 스타일 섹션 */}
 			<style>{`
         .detail-action-btn {
           padding: 6px 14px; font-size: 13px; font-weight: 700;
