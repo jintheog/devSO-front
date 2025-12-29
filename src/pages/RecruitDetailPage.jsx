@@ -12,14 +12,16 @@ import {
 	getContactTypes,
 	getDurationTypes,
 	getMemberCount,
-	// 🌟 댓글 관련 API 추가 가정 (api/index.js에 정의되어 있어야 함)
 	getRecruitComments,
 	createRecruitComment,
 	updateRecruitComment,
 	deleteRecruitComment,
+	getImageUrl,
 } from "../api";
 import { useAuth } from "../contexts/AuthContext";
 import { Icon } from "@iconify/react";
+// 🌟 채팅 페이지와 동일한 MUI 컴포넌트 추가
+import { Avatar, Badge } from "@mui/material";
 
 import "react-quill-new/dist/quill.snow.css";
 
@@ -29,10 +31,11 @@ export default function RecruitDetailPage() {
 	const { user } = useAuth();
 
 	const [recruit, setRecruit] = useState(null);
-	const [comments, setComments] = useState([]); // 🌟 댓글 목록 상태
-	const [commentInput, setCommentInput] = useState(""); // 🌟 새 댓글 입력 상태
-	const [editingCommentId, setEditingCommentId] = useState(null); // 🌟 수정 중인 댓글 ID
-	const [editInput, setEditInput] = useState(""); // 🌟 수정 입력 상태
+	const [comments, setComments] = useState([]);
+	const [commentInput, setCommentInput] = useState("");
+	const [editingCommentId, setEditingCommentId] = useState(null);
+	const [editInput, setEditInput] = useState("");
+	const [replyTo, setReplyTo] = useState(null);
 
 	const [options, setOptions] = useState({
 		types: [],
@@ -48,7 +51,7 @@ export default function RecruitDetailPage() {
 		try {
 			const [detailRes, commentRes, t, p, s, pr, c, d, m] = await Promise.all([
 				getRecruitDetail(id),
-				getRecruitComments(id), // 🌟 댓글 로드 추가
+				getRecruitComments(id),
 				getTypes(),
 				getPositions(),
 				getTechStacks(),
@@ -59,7 +62,7 @@ export default function RecruitDetailPage() {
 			]);
 
 			setRecruit(detailRes.data.data);
-			setComments(commentRes.data.data || []); // 🌟 댓글 설정
+			setComments(commentRes.data.data || []);
 			setOptions({
 				types: t.data,
 				positions: p.data,
@@ -78,38 +81,37 @@ export default function RecruitDetailPage() {
 		if (id) fetchData();
 	}, [id]);
 
-	// ===== 댓글 로직 =====
-
-	// 1. 댓글 등록
 	const handleCommentSubmit = async () => {
 		if (!commentInput.trim()) return;
 		try {
-			await createRecruitComment(id, { content: commentInput });
+			await createRecruitComment(id, {
+				content: commentInput,
+				parentId: replyTo ? replyTo.id : null,
+			});
 			setCommentInput("");
-			fetchData(); // 🌟 목록 및 카운트 갱신
+			setReplyTo(null);
+			fetchData();
 		} catch (err) {
 			alert("댓글 등록에 실패했습니다.");
 		}
 	};
 
-	// 2. 댓글 삭제
 	const handleCommentDelete = async (commentId) => {
 		if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
 		try {
 			await deleteRecruitComment(id, commentId);
-			fetchData(); // 🌟 목록 및 카운트 갱신
+			fetchData();
 		} catch (err) {
 			alert("댓글 삭제에 실패했습니다.");
 		}
 	};
 
-	// 3. 댓글 수정 모드 진입
 	const startEdit = (comment) => {
 		setEditingCommentId(comment.id);
 		setEditInput(comment.content);
+		setReplyTo(null);
 	};
 
-	// 4. 댓글 수정 실행
 	const handleCommentUpdate = async (commentId) => {
 		if (!editInput.trim()) return;
 		try {
@@ -121,7 +123,13 @@ export default function RecruitDetailPage() {
 		}
 	};
 
-	// 기존 유틸 함수
+	const startReply = (comment) => {
+		setReplyTo({ id: comment.id, username: comment.author?.username });
+		setEditingCommentId(null);
+		setCommentInput("");
+		document.getElementById("comment-input-field")?.focus();
+	};
+
 	const getLabel = (optionList, serverValue) => {
 		if (
 			!optionList ||
@@ -224,17 +232,18 @@ export default function RecruitDetailPage() {
 				</h1>
 				<div className="flex justify-between items-center pb-8 border-b border-gray-50">
 					<div className="flex items-center gap-3">
-						<div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center text-lg overflow-hidden border border-yellow-50">
-							{recruit.userProfileImageUrl ? (
-								<img
-									src={recruit.userProfileImageUrl}
-									alt="profile"
-									className="w-full h-full object-cover"
-								/>
-							) : (
-								"😊"
-							)}
-						</div>
+						{/* 🌟 채팅 페이지와 동일한 방식 적용 */}
+						<Avatar
+							src={getImageUrl(recruit.userProfileImageUrl)}
+							sx={{
+								width: 40,
+								height: 40,
+								bgcolor: "#f5f5f5",
+								border: "1px solid #eee",
+							}}
+						>
+							😊
+						</Avatar>
 						<div className="flex flex-col">
 							<span className="font-bold text-sm text-gray-800">
 								{recruit.username || "익명"}
@@ -268,7 +277,7 @@ export default function RecruitDetailPage() {
 				</div>
 			</header>
 
-			{/* 정보 섹션 및 본문 섹션 유지 */}
+			{/* 정보 섹션 생략... */}
 			<section className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-16 pb-12 border-b border-gray-50">
 				<InfoItem
 					label="모집 구분"
@@ -312,7 +321,6 @@ export default function RecruitDetailPage() {
 				</div>
 			</section>
 
-			{/* 북마크 및 조회수 섹션 */}
 			<footer className="py-8 flex justify-between items-center border-b border-gray-50">
 				<div className="flex items-center gap-6">
 					<span className="text-gray-400 text-sm flex items-center gap-1">
@@ -342,7 +350,7 @@ export default function RecruitDetailPage() {
 				</div>
 			</footer>
 
-			{/* 🌟 수정/추가된 댓글 섹션 */}
+			{/* --- 댓글 섹션 --- */}
 			<section className="mt-10 pb-20">
 				<h3 className="font-bold mb-6 text-gray-900 text-lg">
 					댓글{" "}
@@ -351,39 +359,186 @@ export default function RecruitDetailPage() {
 					</span>
 				</h3>
 
-				{/* 댓글 작성란 */}
-				<div className="bg-gray-50 p-5 rounded-2xl flex items-center gap-4 border border-gray-100 shadow-sm mb-10">
-					<div className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-sm shadow-sm overflow-hidden">
-						{user?.profileImageUrl ? (
-							<img
-								src={user.profileImageUrl}
-								alt="me"
-								className="w-full h-full object-cover"
-							/>
-						) : user ? (
-							"😊"
-						) : (
-							"👤"
-						)}
+				{/* 내 댓글 작성란 */}
+				<div className="bg-gray-50 p-5 rounded-2xl flex flex-col gap-3 border border-gray-100 shadow-sm mb-10">
+					{replyTo && (
+						<div className="flex justify-between items-center px-3 py-1.5 bg-blue-50 rounded-lg text-xs font-bold text-blue-600">
+							<span>@{replyTo.username} 님에게 답글 남기는 중...</span>
+							<button
+								onClick={() => setReplyTo(null)}
+								className="hover:text-red-500"
+							>
+								취소
+							</button>
+						</div>
+					)}
+					<div className="flex items-center gap-4">
+						{/* 🌟 내 아바타 */}
+						<Avatar
+							src={getImageUrl(user?.profileImageUrl)}
+							sx={{ width: 36, height: 36, bgcolor: "#fff" }}
+						>
+							👤
+						</Avatar>
+						<input
+							id="comment-input-field"
+							type="text"
+							value={commentInput}
+							onChange={(e) => setCommentInput(e.target.value)}
+							onKeyPress={(e) => e.key === "Enter" && handleCommentSubmit()}
+							placeholder={
+								user
+									? replyTo
+										? "답글을 입력하세요..."
+										: "댓글을 입력하세요..."
+									: "로그인 후 이용 가능합니다."
+							}
+							disabled={!user}
+							className="bg-transparent flex-1 focus:outline-none text-[15px]"
+						/>
+						<button
+							onClick={handleCommentSubmit}
+							disabled={!user || !commentInput.trim()}
+							className="bg-gray-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold disabled:bg-gray-200"
+						>
+							{replyTo ? "답글 등록" : "등록"}
+						</button>
 					</div>
-					<input
-						type="text"
-						value={commentInput}
-						onChange={(e) => setCommentInput(e.target.value)}
-						onKeyPress={(e) => e.key === "Enter" && handleCommentSubmit()}
-						placeholder={
-							user ? "댓글을 입력하세요..." : "로그인 후 이용 가능합니다."
-						}
-						disabled={!user}
-						className="bg-transparent flex-1 focus:outline-none text-[15px]"
-					/>
-					<button
-						onClick={handleCommentSubmit}
-						disabled={!user || !commentInput.trim()}
-						className="bg-gray-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold disabled:bg-gray-200 transition"
-					>
-						등록
-					</button>
+				</div>
+
+				{/* 댓글 목록 */}
+				<div className="space-y-8">
+					{comments.map((comment) => (
+						<div key={comment.id} className="flex flex-col gap-4">
+							<div className="flex gap-4 group">
+								{/* 🌟 댓글 작성자 아바타 */}
+								<Avatar
+									src={getImageUrl(comment.author?.profileImageUrl)}
+									sx={{
+										width: 40,
+										height: 40,
+										bgcolor: "#f5f5f5",
+										border: "1px solid #eee",
+									}}
+								>
+									😊
+								</Avatar>
+								<div className="flex-1">
+									<div className="flex items-center justify-between mb-1.5">
+										<div className="flex items-center gap-2">
+											<span className="font-bold text-[14px] text-gray-800">
+												{comment.author?.username}
+											</span>
+											<span className="text-[12px] text-gray-400">
+												{new Date(comment.createdAt).toLocaleDateString(
+													"ko-KR"
+												)}
+											</span>
+										</div>
+										{comment.isOwner && editingCommentId !== comment.id && (
+											<div className="flex gap-3">
+												<button
+													onClick={() => startEdit(comment)}
+													className="text-xs font-bold text-gray-400 hover:text-blue-500"
+												>
+													수정
+												</button>
+												<button
+													onClick={() => handleCommentDelete(comment.id)}
+													className="text-xs font-bold text-gray-400 hover:text-red-500"
+												>
+													삭제
+												</button>
+											</div>
+										)}
+									</div>
+									{editingCommentId === comment.id ? (
+										<div className="mt-2 bg-white border border-gray-200 rounded-xl p-2 shadow-sm">
+											<textarea
+												value={editInput}
+												onChange={(e) => setEditInput(e.target.value)}
+												className="w-full bg-transparent p-2 text-[15px] focus:outline-none min-h-20 resize-none"
+											/>
+											<div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-50">
+												<button
+													onClick={() => setEditingCommentId(null)}
+													className="text-xs font-bold px-4 py-2 bg-gray-100 text-gray-600 rounded-lg"
+												>
+													취소
+												</button>
+												<button
+													onClick={() => handleCommentUpdate(comment.id)}
+													className="text-xs font-bold px-4 py-2 bg-gray-900 text-white rounded-lg"
+												>
+													수정완료
+												</button>
+											</div>
+										</div>
+									) : (
+										<>
+											<p className="text-[15px] text-gray-600 leading-relaxed whitespace-pre-wrap">
+												{comment.content}
+											</p>
+											<button
+												onClick={() => startReply(comment)}
+												className="text-xs font-extrabold text-gray-400 mt-2 hover:text-gray-900 uppercase"
+											>
+												답글 달기
+											</button>
+										</>
+									)}
+								</div>
+							</div>
+
+							{/* 자식 댓글 */}
+							{comment.children?.map((child) => (
+								<div
+									key={child.id}
+									className="ml-14 space-y-6 border-l-2 border-gray-50 pl-6 mt-2"
+								>
+									<div className="flex gap-3">
+										{/* 🌟 자식 댓글 아바타 */}
+										<Avatar
+											src={getImageUrl(child.author?.profileImageUrl)}
+											sx={{
+												width: 32,
+												height: 32,
+												bgcolor: "#f5f5f5",
+												border: "1px solid #eee",
+											}}
+										>
+											😊
+										</Avatar>
+										<div className="flex-1">
+											<div className="flex items-center justify-between mb-1">
+												<div className="flex items-center gap-2">
+													<span className="font-bold text-[13px] text-gray-800">
+														{child.author?.username}
+													</span>
+													<span className="text-[11px] text-gray-400">
+														{new Date(child.createdAt).toLocaleDateString(
+															"ko-KR"
+														)}
+													</span>
+												</div>
+												{child.isOwner && (
+													<button
+														onClick={() => handleCommentDelete(child.id)}
+														className="text-[10px] font-bold text-gray-300 hover:text-red-500"
+													>
+														삭제
+													</button>
+												)}
+											</div>
+											<p className="text-[14px] text-gray-600 leading-relaxed">
+												{child.content}
+											</p>
+										</div>
+									</div>
+								</div>
+							))}
+						</div>
+					))}
 				</div>
 
 				{/* 댓글 목록 */}
@@ -471,20 +626,11 @@ export default function RecruitDetailPage() {
 			{/* 스타일 섹션 */}
 			<style>{`
         .detail-action-btn {
-          padding: 6px 14px;
-          font-size: 13px;
-          font-weight: 700;
-          background-color: #f9fafb;
-          border: 1px solid #e5e7eb;
-          border-radius: 6px;
-          color: #6b7280;
-          transition: all 0.2s;
+          padding: 6px 14px; font-size: 13px; font-weight: 700;
+          background-color: #f9fafb; border: 1px solid #e5e7eb;
+          border-radius: 6px; color: #6b7280; transition: all 0.2s;
         }
-        .detail-action-btn:hover {
-          background-color: #ffffff;
-          color: #111827;
-          border-color: #d1d5db;
-        }
+        .detail-action-btn:hover { background-color: #ffffff; color: #111827; border-color: #d1d5db; }
       `}</style>
 		</div>
 	);
