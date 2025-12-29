@@ -103,6 +103,8 @@ export const searchUsers = (query) => api.get(`/api/users/search?q=${query}`);
 export const getComments = (postId) => api.get(`/api/posts/${postId}/comments`);
 export const createComment = (postId, data) =>
 	api.post(`/api/posts/${postId}/comments`, data);
+export const updateComment = (postId, commentId, data) =>
+	api.put(`/api/posts/${postId}/comments/${commentId}`, data);
 export const deleteComment = (postId, commentId) =>
 	api.delete(`/api/posts/${postId}/comments/${commentId}`);
 
