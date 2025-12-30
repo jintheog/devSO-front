@@ -75,7 +75,7 @@ const ProfilePage = () => {
             </span>
           </div>
           <p className="text-xl opacity-90 font-medium mb-6">
-            {profileData.careers?.[0]?.position || "프리랜서 / 구직 중"}
+            {profileData.careers?.[0]?.position || ""}
           </p>
           {isOwnProfile && (
             <button 
