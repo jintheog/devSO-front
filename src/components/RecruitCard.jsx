@@ -1,6 +1,7 @@
 import React from "react";
 import { Icon } from "@iconify/react";
 import { getImageUrl } from "../api/index.js";
+import { useNavigate } from "react-router-dom";
 
 const RecruitCard = ({
 	recruit = {},
@@ -8,6 +9,8 @@ const RecruitCard = ({
 	onClick = () => {},
 	onBookmarkClick = () => {},
 }) => {
+	const navigate = useNavigate();
+
 	const {
 		type, // 1: 스터디, 2: 프로젝트 (예시)
 		positions = [],
@@ -57,6 +60,13 @@ const RecruitCard = ({
 			return;
 		}
 		onClick();
+	};
+
+	const handleProfileClick = (e) => {
+		e.stopPropagation(); // 카드 상세 이동 방지
+		if (username && username !== "익명") {
+			navigate(`/profile/${username}`);
+		}
 	};
 
 	return (
@@ -334,7 +344,15 @@ const RecruitCard = ({
 						alignItems: "center",
 					}}
 				>
-					<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+					<div
+						onClick={handleProfileClick} // 클릭 시 이동
+						style={{
+							display: "flex",
+							alignItems: "center",
+							gap: "8px",
+							cursor: "pointer", // 포인터 커서 추가
+						}}
+					>
 						{profileImageUrl ? (
 							<img
 								src={getImageUrl(profileImageUrl)}

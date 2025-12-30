@@ -217,6 +217,12 @@ export default function RecruitDetailPage() {
 		}
 	};
 
+	const handleProfileClick = (username) => {
+		if (username && username !== "익명") {
+			navigate(`/profile/${username}`);
+		}
+	};
+
 	if (!recruit)
 		return (
 			<div className="text-center py-20 text-gray-500 font-medium">
@@ -248,7 +254,10 @@ export default function RecruitDetailPage() {
 					{recruit.title}
 				</h1>
 				<div className="flex justify-between items-center pb-8 border-b border-gray-50">
-					<div className="flex items-center gap-3">
+					<div
+						className="flex items-center gap-3 cursor-pointer group"
+						onClick={() => handleProfileClick(recruit.username)}
+					>
 						<Avatar
 							src={getImageUrl(recruit.profileImageUrl)}
 							sx={{
