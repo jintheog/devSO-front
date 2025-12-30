@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getProfile, updateProfile } from '../api';
+import { getProfile, updateProfile, getTechStacks } from '../api'; // getTechStacks 추가됨
 import ProfileForm from '../components/ProfileForm';
 import EducationForm from '../components/EducationForm';
 import CareerForm from '../components/CareerForm';
@@ -23,45 +23,43 @@ const ProfileEditPage = () => {
   const [activities, setActivities] = useState([]);
   const [certis, setCertis] = useState([]); 
   const [skills, setSkills] = useState([]);
+  
+  // API에서 가져온 전체 스택 리스트 상태
+  const [stackOptions, setStackOptions] = useState([]);
 
   useEffect(() => {
     if (currentUser?.username) {
-      getProfile(currentUser.username)
-        .then((response) => {
-          const data = response.data.data || response.data; 
-          setProfileData({
-            name: data.name || '', bio: data.bio || '', profileImageUrl: data.profileImageUrl || '',
-            phone: data.phone || '', portfolio: data.portfolio || '', email: data.email || '',
-          });
-          setEducations(data.educations || []);
-          setCareers(data.careers || []);
-          setActivities(data.activities || []);
-          setCertis(data.certis || []);
-          setSkills(data.skills || []);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
+      // 1. 프로필 정보 및 2. 전체 스택 목록 동시 호출
+      Promise.all([
+        getProfile(currentUser.username),
+        getTechStacks()
+      ])
+      .then(([profileRes, stackRes]) => {
+        const data = profileRes.data.data || profileRes.data; 
+        const stacks = stackRes.data.data || stackRes.data;
+
+        setProfileData({
+          name: data.name || '', bio: data.bio || '', profileImageUrl: data.profileImageUrl || '',
+          phone: data.phone || '', portfolio: data.portfolio || '', email: data.email || '',
+        });
+        setEducations(data.educations || []);
+        setCareers(data.careers || []);
+        setActivities(data.activities || []);
+        setCertis(data.certis || []);
+        setSkills(data.skills || []);
+        
+        setStackOptions(stacks); // API로 받은 스택 목록 저장
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
     }
   }, [currentUser]);
 
   const handleSave = async () => {
     if (!currentUser?.username) return;
-
-    // --- 최종 유효성 검사 ---
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^01[016789]-\d{3,4}-\d{4}$/;
-    const urlPattern = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,6}\.?)(\/[\w.-]*)*\/?$/i;
-
-    if (profileData.email && !emailRegex.test(profileData.email)) {
-      alert('올바른 이메일 형식이 아닙니다.'); return;
-    }
-    if (profileData.phone && !phoneRegex.test(profileData.phone)) {
-      alert('전화번호 형식을 확인해주세요 (010-0000-0000).'); return;
-    }
-    // 포트폴리오는 URL 또는 @(이메일) 중 하나라도 만족해야 함
-    if (profileData.portfolio && !urlPattern.test(profileData.portfolio) && !profileData.portfolio.includes('@')) {
-      alert('포트폴리오에 유효한 링크(https://) 또는 이메일을 입력해주세요.'); return;
-    }
 
     const totalData = {
       ...profileData, 
@@ -73,8 +71,7 @@ const ProfileEditPage = () => {
       alert('프로필이 성공적으로 저장되었습니다.');
       navigate(`/profile/${currentUser.username}`);
     } catch (err) {
-      const errorMsg = err.response?.data?.message || '저장 실패';
-      alert(`저장 실패: ${errorMsg}`);
+      alert(`저장 실패: ${err.response?.data?.message || '알 수 없는 오류'}`);
     }
   };
 
@@ -106,23 +103,18 @@ const ProfileEditPage = () => {
         </section>
 
         <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <SkillsForm initialData={skills} onDataChange={setSkills} />
+          {/* options에 stacks 전달 */}
+          <SkillsForm 
+            initialData={skills} 
+            options={{ stacks: stackOptions }} 
+            onDataChange={setSkills} 
+          />
         </section>
       </div>
 
       <div className="flex justify-end gap-4 mt-10">
-        <button 
-          className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-          onClick={() => navigate(-1)}
-        >
-          취소
-        </button>
-        <button 
-          className="px-6 py-2.5 rounded-lg bg-[#6c5ce7] text-white font-bold shadow-md hover:bg-[#5a50c9] transition-all transform hover:-translate-y-0.5" 
-          onClick={handleSave}
-        >
-          저장하기
-        </button>
+        <button className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50" onClick={() => navigate(-1)}>취소</button>
+        <button className="px-6 py-2.5 rounded-lg bg-[#6c5ce7] text-white font-bold shadow-md hover:bg-[#5a50c9]" onClick={handleSave}>저장하기</button>
       </div>
     </div>
   );

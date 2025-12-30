@@ -19,7 +19,7 @@ const RecruitMainPage = () => {
 
 	// 🌟 1. 필터 상태 관리
 	const [filter, setFilter] = useState({
-		type: null,
+		type: null, 
 		position: null,
 		stacks: [],
 		search: "",
