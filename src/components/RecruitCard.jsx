@@ -65,7 +65,7 @@ const RecruitCard = ({
 				transition: "transform 0.2s, box-shadow 0.2s",
 			}}
 		>
-			{/* 북마크 버튼 */}
+			{/* 북마크 버튼 및 마감 레이어 생략 (기존과 동일) */}
 			<button
 				type="button"
 				onClick={(e) => {
@@ -146,7 +146,6 @@ const RecruitCard = ({
 				마감일 | {formattedDeadline}
 			</div>
 
-			{/* 제목 말줄임표 처리 (2줄) */}
 			<h3
 				className="card-title"
 				style={{
@@ -176,6 +175,7 @@ const RecruitCard = ({
 							flexWrap: "wrap",
 							gap: "0.4rem",
 							marginBottom: "1.2rem",
+							alignItems: "flex-start", // 🌟 부모가 자식 높이를 강제로 늘리지 못하게 설정
 						}}
 					>
 						{positions.slice(0, 3).map((pos, idx) => (
@@ -184,12 +184,21 @@ const RecruitCard = ({
 								className="tag position-tag"
 								style={{
 									fontSize: "0.75rem",
-									padding: "4px 10px", // 패딩을 조금 더 주어 안정감 있게
-									backgroundColor: "#f0f4ff", // 🌟 아주 연한 푸른색 계열로 변경 (가독성 UP)
-									color: "#4a5568", // 🌟 글자색을 조금 더 진한 회색으로 변경
+									padding: "2px 8px", // 🌟 세로 padding을 줄여서 박스 높이를 조절
+									backgroundColor: "#f0f4ff",
+									color: "#4a5568",
 									borderRadius: "6px",
-									fontWeight: "600", // 🌟 글자를 살짝 두껍게
-									border: "1px solid #e2e8f0", // 🌟 아주 연한 테두리 추가
+									fontWeight: "600",
+									border: "1px solid #e2e8f0",
+
+									// 🌟 가로/세로 크기 고정 및 최적화
+									display: "inline-flex",
+									alignItems: "center",
+									justifyContent: "center",
+									width: "fit-content", // 가로는 글자 길이에 맞게
+									height: "24px", // 🌟 세로 높이를 명시적으로 고정 (선택 사항)
+									lineHeight: "1", // 행간을 줄여서 텍스트가 중앙에 오게 함
+									whiteSpace: "nowrap",
 								}}
 							>
 								{getLabel(options.positions, pos)}
@@ -209,46 +218,59 @@ const RecruitCard = ({
 					</div>
 				)}
 
-				{/* 🌟 스택: 이미지만 렌더링 */}
+				{/* 스택 영역 */}
 				{stacks.length > 0 && (
 					<div
 						className="stacks"
 						style={{
 							display: "flex",
 							flexWrap: "wrap",
-							gap: "0.8rem",
+							gap: "0.6rem",
 							alignItems: "center",
 						}}
 					>
-						{stacks.slice(0, 8).map(
-							(
-								stack,
-								idx // 텍스트가 없어 공간이 넉넉하므로 8개까지 허용
-							) => (
-								<div
-									key={`stack-${idx}`}
-									className="stack-image-wrapper"
-									title={stack.label}
-								>
-									{stack.imageUrl ? (
-										<img
-											src={stack.imageUrl}
-											alt={stack.label}
-											style={{
-												width: "24px", // 텍스트가 없을 때 너무 작지 않게 크기 상향
-												height: "24px",
-												objectFit: "contain",
-												filter: isExpired ? "grayscale(100%)" : "none", // 마감된 글은 아이콘도 흑백처리
-											}}
-										/>
-									) : (
-										<span style={{ fontSize: "0.7rem", color: "#ccc" }}>
-											{stack.label}
-										</span>
-									)}
-								</div>
-							)
-						)}
+						{stacks.slice(0, 8).map((stack, idx) => (
+							<div
+								key={`stack-${idx}`}
+								title={stack.label}
+								style={{
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "center",
+									width: "28px",
+									height: "28px",
+								}}
+							>
+								{stack.imageUrl ? (
+									<img
+										src={stack.imageUrl}
+										alt={stack.label}
+										style={{
+											width: "24px",
+											height: "24px",
+											objectFit: "contain",
+											filter: isExpired ? "grayscale(100%)" : "none",
+										}}
+									/>
+								) : (
+									<div
+										style={{
+											width: "22px",
+											height: "22px",
+											backgroundColor: "#f0f0f0",
+											borderRadius: "4px",
+											display: "flex",
+											alignItems: "center",
+											justifyContent: "center",
+											fontSize: "0.6rem",
+											color: "#999",
+										}}
+									>
+										{stack.label?.substring(0, 1).toUpperCase()}
+									</div>
+								)}
+							</div>
+						))}
 						{stacks.length > 8 && (
 							<span style={{ fontSize: "0.75rem", color: "#aaa" }}>+</span>
 						)}
@@ -264,6 +286,7 @@ const RecruitCard = ({
 				}}
 			/>
 
+			{/* 푸터 영역 생략 (기존과 동일) */}
 			<div
 				className="card-footer"
 				style={{

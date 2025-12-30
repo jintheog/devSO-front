@@ -41,9 +41,12 @@ export default function RecruitCreatePage() {
 	const [position, setPosition] = useState([]);
 	const [progressType, setProgressType] = useState(null);
 	const [duration, setDuration] = useState(null);
-	const [stacks, setStacks] = useState([]);
 	const [totalCount, setTotalCount] = useState(null);
 	const [contactMethod, setContactMethod] = useState(null);
+
+	// 기술 스택 관련 상태
+	const [selectedStacks, setSelectedStacks] = useState([]);
+	const [activeCategory, setActiveCategory] = useState("모두보기");
 
 	// enum 옵션 상태
 	const [options, setOptions] = useState({
@@ -73,7 +76,7 @@ export default function RecruitCreatePage() {
 				const mappedOptions = {
 					types: t.data,
 					positions: p.data,
-					stacks: s.data, // 🌟 백엔드 StackResponse (value, label, key, imageUrl) 포함
+					stacks: s.data,
 					progress: pr.data,
 					contacts: c.data,
 					durations: d.data,
@@ -81,13 +84,10 @@ export default function RecruitCreatePage() {
 				};
 				setOptions(mappedOptions);
 
-				// 🌟 수정 모드 데이터 매핑 로직 개선
 				if (isEditMode && editData) {
 					const findOption = (opts, val) => {
 						if (val === undefined || val === null) return null;
-						// val이 객체일 경우 value 추출, 아닐 경우 그대로 사용
 						const targetVal = typeof val === "object" ? val.value : val;
-
 						return (
 							opts.find(
 								(o) =>
@@ -109,7 +109,6 @@ export default function RecruitCreatePage() {
 					);
 					setTotalCount(findOption(mappedOptions.members, editData.totalCount));
 
-					// Multi Select (포지션 매핑)
 					if (Array.isArray(editData.positions)) {
 						const posItems = editData.positions.map((p) =>
 							typeof p === "object" ? String(p.value) : String(p)
@@ -123,18 +122,11 @@ export default function RecruitCreatePage() {
 						);
 					}
 
-					// 🌟 기술 스택 매핑 (핵심 수정 부분)
 					if (Array.isArray(editData.stacks)) {
-						const stackItems = editData.stacks.map((s) =>
-							typeof s === "object" ? String(s.value) : String(s)
+						const stackIds = editData.stacks.map((s) =>
+							typeof s === "object" ? s.value : s
 						);
-						setStacks(
-							mappedOptions.stacks.filter(
-								(o) =>
-									stackItems.includes(String(o.value)) ||
-									(o.key && stackItems.includes(String(o.key)))
-							)
-						);
+						setSelectedStacks(stackIds);
 					}
 				}
 			} catch (err) {
@@ -144,13 +136,28 @@ export default function RecruitCreatePage() {
 		fetchEnumsAndSetData();
 	}, [isEditMode, editData]);
 
-	// 3. 제출 로직
+	const handleStackToggle = (stackValue) => {
+		setSelectedStacks((prev) =>
+			prev.includes(stackValue)
+				? prev.filter((id) => id !== stackValue)
+				: [...prev, stackValue]
+		);
+	};
+
+	const filteredStacks = options.stacks.filter((s) => {
+		if (activeCategory === "모두보기") return true;
+		const categoryMap = {
+			프론트엔드: "FE",
+			백엔드: "BE",
+			모바일: "MOBILE",
+			기타: "ETC",
+		};
+		return s.category === categoryMap[activeCategory];
+	});
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-
-		const isContentEmpty =
-			content.replace(/<(.|\n)*?>/g, "").trim().length === 0;
-		if (isContentEmpty) {
+		if (content.replace(/<(.|\n)*?>/g, "").trim().length === 0) {
 			alert("내용을 입력해주세요.");
 			return;
 		}
@@ -162,7 +169,7 @@ export default function RecruitCreatePage() {
 			positions: position.map((p) => p.value),
 			progressType: progressType?.value ?? null,
 			duration: duration?.value ?? null,
-			stacks: stacks.map((s) => s.value), // ID값만 전송
+			stacks: selectedStacks,
 			totalCount: totalCount ? Number(totalCount.value) : 0,
 			deadLine,
 			contactMethod: contactMethod?.value ?? null,
@@ -185,61 +192,6 @@ export default function RecruitCreatePage() {
 			alert("처리에 실패했습니다.");
 		}
 	};
-
-	// 🌟 Select 컴포넌트 커스텀: 아이콘 표시
-	const formatOptionLabel = ({ label, imageUrl }) => (
-		<div className="flex items-center gap-2">
-			{imageUrl && (
-				<img src={imageUrl} alt={label} className="w-4 h-4 object-contain" />
-			)}
-			<span>{label}</span>
-		</div>
-	);
-
-	const selectStyles = useMemo(
-		() => ({
-			control: (base) => ({
-				...base,
-				borderRadius: "0.375rem",
-				borderColor: "#e5e7eb",
-				padding: "0.1rem",
-				"&:hover": { borderColor: "#a5b4fc" },
-			}),
-			multiValue: (base) => ({
-				...base,
-				backgroundColor: "#f3f4f6",
-				borderRadius: "0.375rem",
-			}),
-		}),
-		[]
-	);
-
-	const quillModules = useMemo(
-		() => ({
-			toolbar: [
-				[{ header: [1, 2, false] }],
-				["bold", "italic", "underline", "strike"],
-				[{ list: "ordered" }, { list: "bullet" }],
-				["link", "image"],
-				["clean"],
-			],
-		}),
-		[]
-	);
-
-	const quillFormats = [
-		"header",
-		"bold",
-		"italic",
-		"underline",
-		"strike",
-		"list",
-		"align",
-		"color",
-		"background",
-		"link",
-		"image",
-	];
 
 	return (
 		<div className="max-w-4xl mx-auto p-8 bg-white min-h-screen">
@@ -313,7 +265,6 @@ export default function RecruitCreatePage() {
 								isMulti
 								value={position}
 								onChange={setPosition}
-								styles={selectStyles}
 								placeholder="포지션 선택"
 							/>
 						</div>
@@ -357,20 +308,149 @@ export default function RecruitCreatePage() {
 					</div>
 				</section>
 
-				<section>
-					<label className="block mb-2 font-semibold text-gray-700 text-sm">
+				{/* 🌟 기술 스택 섹션: 가로형(이미지 왼쪽, 글자 오른쪽) 및 하단 요약 추가 */}
+				<section className="space-y-4">
+					<label className="block font-semibold text-gray-700 text-sm">
 						기술 스택
 					</label>
-					<Select
-						options={options.stacks}
-						isMulti
-						value={stacks}
-						onChange={setStacks}
-						styles={selectStyles}
-						getOptionLabel={(opt) => opt.label} // 🌟 텍스트 검색용
-						formatOptionLabel={formatOptionLabel} // 🌟 아이콘 렌더링용
-						placeholder="기술 스택 선택"
-					/>
+					<div className="border rounded-xl overflow-hidden shadow-sm bg-white">
+						<div className="flex bg-gray-50 border-b overflow-x-auto no-scrollbar">
+							{["모두보기", "프론트엔드", "백엔드", "모바일", "기타"].map(
+								(cat) => (
+									<button
+										key={cat}
+										type="button"
+										className={`px-6 py-3 text-sm font-semibold transition-all whitespace-nowrap ${
+											activeCategory === cat
+												? "bg-white text-indigo-600 border-b-2 border-indigo-600"
+												: "text-gray-500 hover:text-gray-700"
+										}`}
+										onClick={() => setActiveCategory(cat)}
+									>
+										{cat}
+									</button>
+								)
+							)}
+						</div>
+
+						<div
+							style={{
+								display: "grid",
+								gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", // 가로형 크기에 맞게 조정
+								gap: "12px",
+								padding: "20px",
+								minHeight: "150px",
+								alignContent: "start",
+								justifyContent: "start",
+							}}
+						>
+							{filteredStacks.length > 0 ? (
+								filteredStacks.map((s) => {
+									const isSelected = selectedStacks.includes(s.value);
+									return (
+										<button
+											key={s.value}
+											type="button"
+											onClick={() => handleStackToggle(s.value)}
+											style={{
+												display: "flex",
+												alignItems: "center", // 세로 중앙 정렬
+												justifyContent: "flex-start", // 왼쪽부터 정렬
+												gap: "10px",
+												padding: "8px 14px",
+												borderRadius: "50px", // 타원형(캡슐) 형태
+												border: isSelected
+													? "2px solid #6366f1"
+													: "1px solid #e5e7eb",
+												backgroundColor: isSelected ? "#f5f3ff" : "#fff",
+												transition: "all 0.2s ease",
+												cursor: "pointer",
+												width: "100%",
+												boxSizing: "border-box",
+											}}
+										>
+											{s.imageUrl ? (
+												<img
+													src={s.imageUrl}
+													alt={s.label}
+													style={{
+														width: "24px",
+														height: "24px",
+														objectFit: "contain",
+													}}
+												/>
+											) : (
+												<div
+													style={{
+														width: "24px",
+														height: "24px",
+														borderRadius: "50%",
+														backgroundColor: "#eee",
+													}}
+												/>
+											)}
+											<span
+												style={{
+													fontSize: "14px",
+													fontWeight: "500",
+													color: isSelected ? "#4338ca" : "#374151",
+													whiteSpace: "nowrap",
+													overflow: "hidden",
+													textOverflow: "ellipsis",
+												}}
+											>
+												{s.label}
+											</span>
+										</button>
+									);
+								})
+							) : (
+								<div
+									style={{
+										gridColumn: "1 / -1",
+										textAlign: "center",
+										padding: "40px 0",
+										color: "#9ca3af",
+									}}
+								>
+									등록된 스택이 없습니다.
+								</div>
+							)}
+						</div>
+					</div>
+
+					{/* 🌟 선택된 기술 스택 하단 요약 리스트 */}
+					{selectedStacks.length > 0 && (
+						<div className="flex flex-wrap gap-2 mt-3 p-3 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+							<span className="w-full text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">
+								선택된 항목:
+							</span>
+							{options.stacks
+								.filter((s) => selectedStacks.includes(s.value))
+								.map((s) => (
+									<div
+										key={s.value}
+										className="flex items-center gap-1.5 bg-white border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium shadow-sm"
+									>
+										{s.imageUrl && (
+											<img
+												src={s.imageUrl}
+												alt=""
+												className="w-4 h-4 object-contain"
+											/>
+										)}
+										{s.label}
+										<button
+											type="button"
+											onClick={() => handleStackToggle(s.value)}
+											className="ml-1 text-indigo-300 hover:text-indigo-600 font-bold"
+										>
+											×
+										</button>
+									</div>
+								))}
+						</div>
+					)}
 				</section>
 
 				<section className="space-y-4">
@@ -393,8 +473,6 @@ export default function RecruitCreatePage() {
 							theme="snow"
 							value={content}
 							onChange={setContent}
-							modules={quillModules}
-							formats={quillFormats}
 							placeholder="내용을 입력해주세요."
 							className="h-80 mb-12"
 						/>
@@ -405,13 +483,13 @@ export default function RecruitCreatePage() {
 					<button
 						type="button"
 						onClick={() => navigate(-1)}
-						className="px-6 py-2 border rounded-lg hover:bg-gray-100 transition font-bold text-gray-600"
+						className="px-6 py-2 border rounded-lg hover:bg-gray-100 font-bold text-gray-600"
 					>
 						취소
 					</button>
 					<button
 						type="submit"
-						className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition font-bold"
+						className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-bold transition"
 					>
 						{isEditMode ? "수정하기" : "등록하기"}
 					</button>
