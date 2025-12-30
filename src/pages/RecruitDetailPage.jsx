@@ -110,7 +110,7 @@ export default function RecruitDetailPage() {
 		});
 	};
 
-	// 🌟 댓글 등록 로직 복구
+	// 🌟 댓글 등록 (등록 후 전체 데이터를 다시 불러와서 카운트와 목록을 갱신합니다)
 	const handleCommentSubmit = async () => {
 		if (!commentInput.trim()) return;
 		try {
@@ -120,43 +120,45 @@ export default function RecruitDetailPage() {
 			});
 			setCommentInput("");
 			setReplyTo(null);
-			fetchData(); // 등록 후 목록 갱신
+			await fetchData(); // 게시글 상세정보(카운트 포함)와 댓글목록 갱신
 		} catch (err) {
 			alert("댓글 등록에 실패했습니다.");
 		}
 	};
 
-	// 🌟 댓글 삭제 로직 복구
+	// 🌟 댓글 삭제 (A안: 부모 삭제 시 자식까지 삭제되므로 새로고침이 가장 정확합니다)
 	const handleCommentDelete = async (commentId) => {
-		if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
+		if (
+			!window.confirm(
+				"댓글을 삭제하시겠습니까? (답글이 있는 경우 답글도 함께 삭제됩니다)"
+			)
+		)
+			return;
 		try {
 			await deleteRecruitComment(id, commentId);
-			fetchData(); // 삭제 후 목록 갱신
+			await fetchData(); // Soft Delete된 후 카운트가 줄어든 데이터를 새로 가져옴
 		} catch (err) {
 			alert("댓글 삭제에 실패했습니다.");
 		}
 	};
 
-	// 🌟 댓글 수정 시작 로직 복구
 	const startEdit = (comment) => {
 		setEditingCommentId(comment.id);
 		setEditInput(comment.content);
 		setReplyTo(null);
 	};
 
-	// 🌟 댓글 수정 완료 로직 복구
 	const handleCommentUpdate = async (commentId) => {
 		if (!editInput.trim()) return;
 		try {
 			await updateRecruitComment(id, commentId, { content: editInput });
 			setEditingCommentId(null);
-			fetchData(); // 수정 후 목록 갱신
+			fetchData();
 		} catch (err) {
 			alert("댓글 수정에 실패했습니다.");
 		}
 	};
 
-	// 🌟 답글 달기 시작 로직 복구
 	const startReply = (comment) => {
 		setReplyTo({ id: comment.id, username: comment.author?.username });
 		setEditingCommentId(null);
@@ -248,7 +250,7 @@ export default function RecruitDetailPage() {
 				<div className="flex justify-between items-center pb-8 border-b border-gray-50">
 					<div className="flex items-center gap-3">
 						<Avatar
-							src={getImageUrl(recruit.userProfileImageUrl)}
+							src={getImageUrl(recruit.profileImageUrl)}
 							sx={{
 								width: 40,
 								height: 40,
@@ -363,7 +365,7 @@ export default function RecruitDetailPage() {
 				</div>
 			</footer>
 
-			{/* 댓글 섹션 (전체 로직 포함) */}
+			{/* 댓글 섹션 */}
 			<section className="mt-10 pb-20">
 				<h3 className="font-bold mb-6 text-gray-900 text-lg">
 					댓글{" "}
@@ -418,133 +420,138 @@ export default function RecruitDetailPage() {
 				</div>
 
 				<div className="space-y-8">
-					{comments.map((comment) => (
-						<div key={comment.id} className="flex flex-col gap-4">
-							<div className="flex gap-4 group">
-								<Avatar
-									src={getImageUrl(comment.author?.profileImageUrl)}
-									sx={{
-										width: 40,
-										height: 40,
-										bgcolor: "#f5f5f5",
-										border: "1px solid #eee",
-									}}
-								>
-									😊
-								</Avatar>
-								<div className="flex-1">
-									<div className="flex items-center justify-between mb-1.5">
-										<div className="flex items-center gap-2">
-											<span className="font-bold text-[14px] text-gray-800">
-												{comment.author?.username}
-											</span>
-											<span className="text-[12px] text-gray-400">
-												{new Date(comment.createdAt).toLocaleDateString(
-													"ko-KR"
-												)}
-											</span>
-										</div>
-										{comment.isOwner && editingCommentId !== comment.id && (
-											<div className="flex gap-3">
-												<button
-													onClick={() => startEdit(comment)}
-													className="text-xs font-bold text-gray-400 hover:text-blue-500"
-												>
-													수정
-												</button>
-												<button
-													onClick={() => handleCommentDelete(comment.id)}
-													className="text-xs font-bold text-gray-400 hover:text-red-500"
-												>
-													삭제
-												</button>
+					{/* 🌟 parentId가 없는 최상위 댓글만 map을 돌립니다. (백엔드 로직과 맞춤) */}
+					{comments
+						.filter((c) => !c.parentId)
+						.map((comment) => (
+							<div key={comment.id} className="flex flex-col gap-4">
+								<div className="flex gap-4 group">
+									<Avatar
+										src={getImageUrl(comment.author?.profileImageUrl)}
+										sx={{
+											width: 40,
+											height: 40,
+											bgcolor: "#f5f5f5",
+											border: "1px solid #eee",
+										}}
+									>
+										😊
+									</Avatar>
+									<div className="flex-1">
+										<div className="flex items-center justify-between mb-1.5">
+											<div className="flex items-center gap-2">
+												<span className="font-bold text-[14px] text-gray-800">
+													{comment.author?.username}
+												</span>
+												<span className="text-[12px] text-gray-400">
+													{new Date(comment.createdAt).toLocaleDateString(
+														"ko-KR"
+													)}
+												</span>
 											</div>
-										)}
-									</div>
-									{editingCommentId === comment.id ? (
-										<div className="mt-2 bg-white border border-gray-200 rounded-xl p-2 shadow-sm">
-											<textarea
-												value={editInput}
-												onChange={(e) => setEditInput(e.target.value)}
-												className="w-full bg-transparent p-2 text-[15px] focus:outline-none min-h-20 resize-none"
-											/>
-											<div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-50">
-												<button
-													onClick={() => setEditingCommentId(null)}
-													className="text-xs font-bold px-4 py-2 bg-gray-100 text-gray-600 rounded-lg"
-												>
-													취소
-												</button>
-												<button
-													onClick={() => handleCommentUpdate(comment.id)}
-													className="text-xs font-bold px-4 py-2 bg-gray-900 text-white rounded-lg"
-												>
-													수정완료
-												</button>
-											</div>
-										</div>
-									) : (
-										<>
-											<p className="text-[15px] text-gray-600 leading-relaxed whitespace-pre-wrap">
-												{comment.content}
-											</p>
-											<button
-												onClick={() => startReply(comment)}
-												className="text-xs font-extrabold text-gray-400 mt-2 hover:text-gray-900 uppercase"
-											>
-												답글 달기
-											</button>
-										</>
-									)}
-								</div>
-							</div>
-							{comment.children?.map((child) => (
-								<div
-									key={child.id}
-									className="ml-14 space-y-6 border-l-2 border-gray-50 pl-6 mt-2"
-								>
-									<div className="flex gap-3">
-										<Avatar
-											src={getImageUrl(child.author?.profileImageUrl)}
-											sx={{
-												width: 32,
-												height: 32,
-												bgcolor: "#f5f5f5",
-												border: "1px solid #eee",
-											}}
-										>
-											😊
-										</Avatar>
-										<div className="flex-1">
-											<div className="flex items-center justify-between mb-1">
-												<div className="flex items-center gap-2">
-													<span className="font-bold text-[13px] text-gray-800">
-														{child.author?.username}
-													</span>
-													<span className="text-[11px] text-gray-400">
-														{new Date(child.createdAt).toLocaleDateString(
-															"ko-KR"
-														)}
-													</span>
-												</div>
-												{child.isOwner && (
+											{comment.isOwner && editingCommentId !== comment.id && (
+												<div className="flex gap-3">
 													<button
-														onClick={() => handleCommentDelete(child.id)}
-														className="text-[10px] font-bold text-gray-300 hover:text-red-500"
+														onClick={() => startEdit(comment)}
+														className="text-xs font-bold text-gray-400 hover:text-blue-500"
+													>
+														수정
+													</button>
+													<button
+														onClick={() => handleCommentDelete(comment.id)}
+														className="text-xs font-bold text-gray-400 hover:text-red-500"
 													>
 														삭제
 													</button>
-												)}
-											</div>
-											<p className="text-[14px] text-gray-600 leading-relaxed">
-												{child.content}
-											</p>
+												</div>
+											)}
 										</div>
+										{editingCommentId === comment.id ? (
+											<div className="mt-2 bg-white border border-gray-200 rounded-xl p-2 shadow-sm">
+												<textarea
+													value={editInput}
+													onChange={(e) => setEditInput(e.target.value)}
+													className="w-full bg-transparent p-2 text-[15px] focus:outline-none min-h-20 resize-none"
+												/>
+												<div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-50">
+													<button
+														onClick={() => setEditingCommentId(null)}
+														className="text-xs font-bold px-4 py-2 bg-gray-100 text-gray-600 rounded-lg"
+													>
+														취소
+													</button>
+													<button
+														onClick={() => handleCommentUpdate(comment.id)}
+														className="text-xs font-bold px-4 py-2 bg-gray-900 text-white rounded-lg"
+													>
+														수정완료
+													</button>
+												</div>
+											</div>
+										) : (
+											<>
+												<p className="text-[15px] text-gray-600 leading-relaxed whitespace-pre-wrap">
+													{comment.content}
+												</p>
+												<button
+													onClick={() => startReply(comment)}
+													className="text-xs font-extrabold text-gray-400 mt-2 hover:text-gray-900 uppercase"
+												>
+													답글 달기
+												</button>
+											</>
+										)}
 									</div>
 								</div>
-							))}
-						</div>
-					))}
+
+								{/* 대댓글(자식) 렌더링 */}
+								{comment.children?.map((child) => (
+									<div
+										key={child.id}
+										className="ml-14 space-y-6 border-l-2 border-gray-50 pl-6 mt-2"
+									>
+										<div className="flex gap-3">
+											<Avatar
+												src={getImageUrl(child.author?.profileImageUrl)}
+												sx={{
+													width: 32,
+													height: 32,
+													bgcolor: "#f5f5f5",
+													border: "1px solid #eee",
+												}}
+											>
+												😊
+											</Avatar>
+											<div className="flex-1">
+												<div className="flex items-center justify-between mb-1">
+													<div className="flex items-center gap-2">
+														<span className="font-bold text-[13px] text-gray-800">
+															{child.author?.username}
+														</span>
+														<span className="text-[11px] text-gray-400">
+															{new Date(child.createdAt).toLocaleDateString(
+																"ko-KR"
+															)}
+														</span>
+													</div>
+													{child.isOwner && (
+														<button
+															onClick={() => handleCommentDelete(child.id)}
+															className="text-[10px] font-bold text-gray-300 hover:text-red-500"
+														>
+															삭제
+														</button>
+													)}
+												</div>
+												<p className="text-[14px] text-gray-600 leading-relaxed">
+													{child.content}
+												</p>
+											</div>
+										</div>
+									</div>
+								))}
+							</div>
+						))}
 				</div>
 			</section>
 
@@ -573,7 +580,7 @@ function InfoItem({ label, value, isBadge, isStack }) {
 						>
 							{stack.imageUrl && (
 								<img
-									src={stack.imageUrl}
+									src={getImageUrl(stack.imageUrl)}
 									alt={stack.label}
 									className="w-3.5 h-3.5 object-contain"
 								/>

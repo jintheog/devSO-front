@@ -1,5 +1,6 @@
 import React from "react";
 import { Icon } from "@iconify/react";
+import { getImageUrl } from "../api/index.js";
 
 const RecruitCard = ({
 	recruit = {},
@@ -18,6 +19,7 @@ const RecruitCard = ({
 		status,
 		deadLine,
 		bookmarked = false,
+		profileImageUrl,
 	} = recruit;
 
 	// 마감 상태 계산
@@ -333,20 +335,33 @@ const RecruitCard = ({
 					}}
 				>
 					<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-						<div
-							style={{
-								width: "24px",
-								height: "24px",
-								borderRadius: "50%",
-								backgroundColor: "#e9ecef",
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "center",
-								fontSize: "0.7rem",
-							}}
-						>
-							👤
-						</div>
+						{profileImageUrl ? (
+							<img
+								src={getImageUrl(profileImageUrl)}
+								alt=""
+								style={{
+									width: "24px",
+									height: "24px",
+									borderRadius: "50%",
+									objectFit: "cover",
+								}}
+							/>
+						) : (
+							<div
+								style={{
+									width: "24px",
+									height: "24px",
+									borderRadius: "50%",
+									backgroundColor: "#e9ecef",
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "center",
+									fontSize: "0.7rem",
+								}}
+							>
+								👤
+							</div>
+						)}
 						<span
 							style={{
 								fontSize: "0.85rem",
@@ -376,7 +391,7 @@ const RecruitCard = ({
 								gap: "4px",
 							}}
 						>
-							<Icon icon="mdi:comment-outline" /> {commentCount || 0}
+							<Icon icon="mdi:comment-outline" /> {commentCount}
 						</span>
 					</div>
 				</div>
