@@ -8,9 +8,14 @@ const RecruitFilterBar = ({ options, filter, setFilter, resetFilters }) => {
 		stacks = [],
 		progressTypes = [],
 	} = options;
+
 	const [isStackOpen, setIsStackOpen] = useState(false);
 	const [activeCategory, setActiveCategory] = useState("모두보기");
 	const dropdownRef = useRef(null);
+
+	// 🌟 1. 검색어 입력을 위한 로컬 상태 추가
+	// 부모의 filter.search와 동기화하되, 타이핑은 이 로컬 상태에서 처리합니다.
+	const [localSearch, setLocalSearch] = useState(filter.search || "");
 
 	useEffect(() => {
 		const handleClickOutside = (event) => {
@@ -21,6 +26,23 @@ const RecruitFilterBar = ({ options, filter, setFilter, resetFilters }) => {
 		document.addEventListener("mousedown", handleClickOutside);
 		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, []);
+
+	// 🌟 2. 디바운싱 로직 추가
+	// localSearch가 변경되면 타이머를 시작하고, 500ms 동안 변경이 없으면 부모의 filter를 업데이트합니다.
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			if (localSearch !== filter.search) {
+				setFilter((prev) => ({ ...prev, search: localSearch }));
+			}
+		}, 500);
+
+		return () => clearTimeout(timer); // 다음 타이핑이 발생하면 이전 타이머를 취소
+	}, [localSearch, setFilter, filter.search]);
+
+	// 필터 초기화 시 로컬 검색어도 비워줌
+	useEffect(() => {
+		setLocalSearch(filter.search || "");
+	}, [filter.search]);
 
 	const handleFilterChange = (key, value) => {
 		setFilter((prev) => ({ ...prev, [key]: value }));
@@ -57,7 +79,6 @@ const RecruitFilterBar = ({ options, filter, setFilter, resetFilters }) => {
 
 	return (
 		<div className="filter-container">
-			{/* 1. 상단 타입 탭 & 검색창 */}
 			<div className="type-tabs">
 				<div className="type-buttons-group">
 					<button
@@ -84,13 +105,19 @@ const RecruitFilterBar = ({ options, filter, setFilter, resetFilters }) => {
 					<input
 						type="text"
 						placeholder="제목, 글 내용을 검색해보세요."
-						value={filter.search || ""}
-						onChange={(e) => handleFilterChange("search", e.target.value)}
+						// 🌟 3. value와 onChange를 로컬 상태로 변경
+						value={localSearch}
+						onChange={(e) => setLocalSearch(e.target.value)}
+						// 엔터를 쳤을 때 즉시 검색하고 싶다면 아래 핸들러 추가 가능
+						onKeyDown={(e) => {
+							if (e.key === "Enter") {
+								setFilter((prev) => ({ ...prev, search: localSearch }));
+							}
+						}}
 					/>
 				</div>
 			</div>
 
-			{/* 2. 하단 필터 컨트롤 */}
 			<div className="filter-controls">
 				{/* 기술 스택 */}
 				<div className="dropdown-wrapper" ref={dropdownRef}>
@@ -185,7 +212,6 @@ const RecruitFilterBar = ({ options, filter, setFilter, resetFilters }) => {
 					))}
 				</select>
 
-				{/* 토글 버튼 그룹 */}
 				<div className="toggle-group">
 					<button
 						className={`toggle-chip ${filter.onlyMyRecruits ? "active" : ""}`}
@@ -211,7 +237,6 @@ const RecruitFilterBar = ({ options, filter, setFilter, resetFilters }) => {
 					</button>
 				</div>
 
-				{/* 초기화 버튼 (애니메이션 제거 버전) */}
 				<button className="reset-btn" onClick={resetFilters}>
 					<span className="reset-icon">🔄</span>
 					초기화

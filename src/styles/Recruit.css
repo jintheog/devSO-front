@@ -48,7 +48,7 @@
 	transform: translateY(-2px);
 }
 
-/* ===== 3. 필터 영역 (레이아웃 핵심 수정) ===== */
+/* ===== 3. 필터 영역 ===== */
 .filter-area {
 	background-color: #ffffff;
 	padding: 1.5rem;
@@ -60,16 +60,15 @@
 	gap: 1.5rem;
 }
 
-/* 상단 검색 및 드롭다운 정렬 */
 .filter-bar {
 	display: flex;
 	gap: 1rem;
 	align-items: center;
-	flex-wrap: wrap; /* 모바일 대응 */
+	flex-wrap: wrap;
 }
 
 .search-input {
-	flex: 2; /* 검색창을 더 넓게 */
+	flex: 2;
 	min-width: 250px;
 	padding: 0.8rem 1.2rem;
 	border-radius: 10px;
@@ -85,7 +84,6 @@
 	background-color: #fff;
 }
 
-/* 공통 필터 버튼 & 셀렉트 박스 */
 .filter-btn {
 	flex: 1;
 	min-width: 140px;
@@ -108,7 +106,6 @@
 	color: white;
 }
 
-/* 기술 스택 필터 섹션 */
 .stack-filter-section {
 	display: flex;
 	flex-direction: column;
@@ -121,11 +118,10 @@
 	color: #2d3436;
 }
 
-/* 🌟 이미지에서 뭉쳤던 기술 스택 칩 해결 */
 .stack-chips {
 	display: flex;
-	flex-wrap: wrap; /* 줄바꿈 허용 */
-	gap: 0.6rem; /* 칩 사이 간격 */
+	flex-wrap: wrap;
+	gap: 0.6rem;
 }
 
 .stack-chip {
@@ -153,13 +149,12 @@
 .recruit-content {
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: 1.5rem;
 }
 
 .recruit-count {
 	font-size: 1rem;
 	color: #636e72;
-	margin-bottom: 0.5rem;
 }
 
 .recruit-count span {
@@ -170,8 +165,21 @@
 .recruit-posts {
 	display: grid;
 	gap: 2rem;
-	/* 🌟 한 줄에 4개 유지, 화면 작아지면 자동 조절 */
-	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	/* 8개 데이터 기준: PC에서 4열 2줄로 배치됨 */
+	grid-template-columns: repeat(4, 1fr);
+}
+
+/* 반응형 그리드 조절 */
+@media (max-width: 1024px) {
+	.recruit-posts {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 640px) {
+	.recruit-posts {
+		grid-template-columns: 1fr;
+	}
 }
 
 /* ===== 5. 카드 컴포넌트 스타일 ===== */
@@ -186,6 +194,7 @@
 	display: flex;
 	flex-direction: column;
 	position: relative;
+	min-height: 280px; /* 카드 높이 균일화 */
 }
 
 .recruit-card:hover {
@@ -202,7 +211,6 @@
 	color: #2d3436;
 }
 
-/* 태그 그룹 */
 .tags {
 	display: flex;
 	flex-wrap: wrap;
@@ -222,6 +230,67 @@
 .position-tag {
 	background-color: #e3f2fd;
 	color: #1976d2;
+}
+
+/* ===== 6. 추가된 페이지네이션 스타일 (중요) ===== */
+.pagination {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 4rem;
+	margin-bottom: 2rem;
+}
+
+.pagination-number {
+	width: 40px;
+	height: 40px;
+	border-radius: 10px;
+	border: 1px solid #e1e2e6;
+	background-color: white;
+	color: #636e72;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.pagination-number:hover {
+	border-color: #6c5ce7;
+	color: #6c5ce7;
+	background-color: #f8f7ff;
+}
+
+.pagination-number.active {
+	background-color: #6c5ce7;
+	color: white;
+	border-color: #6c5ce7;
+	box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
+}
+
+.pagination-arrow {
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 10px;
+	border: 1px solid #e1e2e6;
+	background-color: white;
+	color: #2d3436;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-size: 1.2rem;
+}
+
+.pagination-arrow:hover:not(:disabled) {
+	background-color: #f1f2f6;
+	border-color: #b2bec3;
+}
+
+.pagination-arrow:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+	background-color: #f9f9fb;
 }
 
 /* 로딩 및 데이터 없음 */

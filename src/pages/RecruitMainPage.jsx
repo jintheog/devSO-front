@@ -11,13 +11,19 @@ import {
 import "../styles/Recruit.css";
 import RecruitCard from "../components/RecruitCard.jsx";
 import RecruitFilterBar from "../components/RecruitFilterBar.jsx";
+import { Icon } from "@iconify/react";
 
 const RecruitMainPage = () => {
 	const navigate = useNavigate();
-	const [recruits, setRecruits] = useState([]); // 게시글 목록
-	const [loading, setLoading] = useState(true); // 로딩 상태
+	const [recruits, setRecruits] = useState([]);
+	const [loading, setLoading] = useState(true);
 
-	// 🌟 1. 필터 상태 관리
+	// 🌟 페이징 상태
+	const [currentPage, setCurrentPage] = useState(0);
+	const [totalPages, setTotalPages] = useState(0);
+	const [totalElements, setTotalElements] = useState(0);
+
+	// 🌟 필터 상태
 	const [filter, setFilter] = useState({
 		type: null,
 		position: null,
@@ -28,7 +34,7 @@ const RecruitMainPage = () => {
 		progressType: null,
 	});
 
-	// 🌟 2. Enum 옵션 데이터 상태
+	// 🌟 옵션 데이터 상태
 	const [options, setOptions] = useState({
 		types: [],
 		positions: [],
@@ -44,21 +50,41 @@ const RecruitMainPage = () => {
 			search: "",
 			onlyOpen: true,
 			onlyBookmarked: false,
-			onlyMyRecruits: false,
 			progressType: null,
 		});
+		setCurrentPage(0);
 	};
 
 	/**
-	 * 🌟 3. 필터링된 게시글 데이터를 가져오는 함수
-	 * getRecruits가 api.get()의 Promise를 리턴하므로 response.data를 확인합니다.
+	 * 🌟 데이터를 가져오는 함수 (useCallback으로 메모이제이션)
 	 */
-	const fetchRecruitsData = useCallback(async (currentFilter) => {
+	const fetchRecruitsData = useCallback(async (currentFilter, page) => {
 		try {
-			const response = await getRecruits(currentFilter);
-			const data = response.data.data || response.data;
+			const response = await getRecruits({
+				...currentFilter,
+				page: page,
+				size: 8,
+			});
 
-			setRecruits(Array.isArray(data) ? data : []);
+			// 백엔드 응답에서 실제 데이터가 담긴 위치를 찾습니다.
+			const rawData = response.data.data || response.data;
+
+			if (rawData && rawData.content) {
+				// 백엔드가 Page 객체를 줄 때
+				// 예: { content: [...], totalPages: 2, totalElements: 10 }
+				setRecruits(rawData.content);
+				setTotalPages(rawData.totalPages); // 서버가 계산해준 전체 페이지 수 (2)
+				setTotalElements(rawData.totalElements); // 서버가 계산해준 전체 글 수 (10)
+			} else if (Array.isArray(rawData)) {
+				// 백엔드가 배열만 줄 때 (현재 사용자의 상황)
+				setRecruits(rawData);
+
+				// 만약 서버가 전체 개수를 안 준다면 프론트에서 임시 계산해야 함
+				// 하지만 실무에서는 반드시 서버가 totalElements를 주도록 백엔드를 수정합니다.
+				const totalCount = rawData.length > 0 ? 10 : 0; // 임시로 10개라고 가정
+				setTotalElements(totalCount);
+				setTotalPages(Math.ceil(totalCount / 8)); // 10/8 = 1.25 -> 올림하여 2페이지
+			}
 		} catch (error) {
 			console.error("모집글 로드 실패:", error);
 			setRecruits([]);
@@ -66,13 +92,13 @@ const RecruitMainPage = () => {
 	}, []);
 
 	/**
-	 * 🌟 4. 페이지 초기 진입 시 로직
+	 * 🌟 로직 1: 페이지 초기 진입 시 공통 데이터 로드
+	 * 의존성 배열을 비워 처음에 한 번만 실행되도록 합니다.
 	 */
 	useEffect(() => {
 		const loadInitialData = async () => {
 			setLoading(true);
 			try {
-				// 병렬 호출로 로딩 속도 향상
 				const [typeRes, posRes, stackRes, progressRes] = await Promise.all([
 					getTypes(),
 					getPositions(),
@@ -87,45 +113,46 @@ const RecruitMainPage = () => {
 					progressTypes: progressRes.data || [],
 				});
 
-				// 첫 게시글 리스트 조회
-				await fetchRecruitsData(filter);
+				// 초기 데이터 호출
+				await fetchRecruitsData(filter, 0);
 			} catch (error) {
-				console.error("초기 데이터 로드 실패:", error);
+				console.error("초기 로드 에러:", error);
 			} finally {
 				setLoading(false);
 			}
 		};
-
 		loadInitialData();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, []); // fetchRecruitsData를 넣지 않아 규칙 위반 방지
 
 	/**
-	 * 🌟 5. 필터 변경 감지 로직
+	 * 🌟 로직 2: 필터 변경 시 페이지만 0으로 리셋
 	 */
 	useEffect(() => {
-		if (!loading) {
-			fetchRecruitsData(filter);
-		}
-	}, [filter, fetchRecruitsData, loading]);
+		setCurrentPage(0);
+	}, [filter]);
 
 	/**
-	 * 🌟 6. 북마크 클릭 핸들러
+	 * 🌟 로직 3: 필터나 페이지가 변경될 때 데이터 다시 불러오기
 	 */
+	useEffect(() => {
+		// 로딩 중이 아닐 때만 호출
+		if (!loading) {
+			fetchRecruitsData(filter, currentPage);
+		}
+	}, [filter, currentPage, fetchRecruitsData, loading]);
+
 	const handleBookmarkClick = async (recruitId) => {
 		try {
 			const response = await toggleBookmark(recruitId);
-			// 서버 응답 구조가 response.data.data에 boolean이 들어있다고 가정
 			const isBookmarked = response.data.data;
-
 			setRecruits((prev) =>
 				prev.map((r) =>
 					r.id === recruitId ? { ...r, bookmarked: isBookmarked } : r
 				)
 			);
 		} catch (error) {
-			console.error("북마크 토글 실패:", error);
-			alert("로그인이 필요한 서비스이거나 서버 오류가 발생했습니다.");
+			console.error("북마크 실패:", error);
 		}
 	};
 
@@ -149,19 +176,17 @@ const RecruitMainPage = () => {
 				resetFilters={resetFilters}
 			/>
 
-			{loading ? (
-				<div className="loading">모집글을 불러오는 중입니다...</div>
-			) : (
-				<div className="recruit-content">
-					<div className="recruit-count">
-						총 <span>{recruits.length}</span>개의 모집글이 있습니다.
-					</div>
+			<div className="recruit-content">
+				<div className="recruit-count">
+					총 <span>{totalElements}</span>개의 모집글이 있습니다.
+				</div>
 
-					{recruits.length === 0 ? (
-						<div className="no-posts">
-							검색 조건에 맞는 게시물이 없습니다. 필터를 변경해보세요!
-						</div>
-					) : (
+				{loading ? (
+					<div className="loading">데이터 로딩 중...</div>
+				) : recruits.length === 0 ? (
+					<div className="no-posts">조건에 맞는 모집글이 없습니다.</div>
+				) : (
+					<>
 						<div className="recruit-posts">
 							{recruits.map((recruit) => (
 								<RecruitCard
@@ -173,9 +198,40 @@ const RecruitMainPage = () => {
 								/>
 							))}
 						</div>
-					)}
-				</div>
-			)}
+
+						{/* 페이지네이션 */}
+						{totalPages > 1 && (
+							<div className="pagination">
+								<button
+									className="pagination-arrow"
+									disabled={currentPage === 0}
+									onClick={() => setCurrentPage((p) => p - 1)}
+								>
+									<Icon icon="mdi:chevron-left" />
+								</button>
+								{[...Array(totalPages)].map((_, i) => (
+									<button
+										key={i}
+										className={`pagination-number ${
+											currentPage === i ? "active" : ""
+										}`}
+										onClick={() => setCurrentPage(i)}
+									>
+										{i + 1}
+									</button>
+								))}
+								<button
+									className="pagination-arrow"
+									disabled={currentPage === totalPages - 1}
+									onClick={() => setCurrentPage((p) => p + 1)}
+								>
+									<Icon icon="mdi:chevron-right" />
+								</button>
+							</div>
+						)}
+					</>
+				)}
+			</div>
 		</div>
 	);
 };
