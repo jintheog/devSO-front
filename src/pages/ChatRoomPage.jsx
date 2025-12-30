@@ -196,11 +196,12 @@ const ChatRoomPage = ({ roomId, onBack }) => {
                         color: isSentByCurrentUser
                           ? "primary.contrastText"
                           : "text.primary",
-                        overflowWrap: "break-word", // Ensure long words break
+                        maxWidth: "100%",
+                        wordBreak: "break-word",
                       }}>
                       <Typography
                         variant="body1"
-                        sx={{ overflowWrap: "break-word" }}>
+                        sx={{ wordBreak: "break-word" }}>
                         {msg.message}
                       </Typography>
                     </Paper>

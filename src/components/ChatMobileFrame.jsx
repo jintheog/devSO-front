@@ -1,9 +1,10 @@
 import React from "react";
 import { Card, Box, Paper } from "@mui/material";
 
-const ChatMobileFrame = ({ header, children }) => {
+const ChatMobileFrame = ({ header, children, ...props }) => {
   return (
     <Card
+      {...props}
       sx={{
         width: "100%", // Take full width of parent Box
         height: "100%", // Take full height of parent Box
@@ -13,6 +14,7 @@ const ChatMobileFrame = ({ header, children }) => {
         flexDirection: "column",
         overflow: "hidden",
         backgroundColor: "#fff",
+        ...props.sx
       }}
     >
       {/* Header */}

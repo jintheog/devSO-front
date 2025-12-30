@@ -1,5 +1,4 @@
 import React from 'react';
-import ChatMobileFrame from './ChatMobileFrame';
 import ChatListPage from '../pages/ChatListPage';
 import ChatRoomPage from '../pages/ChatRoomPage';
 import { useChat } from '../contexts/ChatContext';
@@ -28,9 +27,7 @@ const ChatWidget = () => {
 
         }}
       >
-        <ChatMobileFrame>
-          {chatContent}
-        </ChatMobileFrame>
+        {chatContent}
       </Box>
     </Slide>
   );

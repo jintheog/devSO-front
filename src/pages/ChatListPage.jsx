@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   getMyChatRooms,
   enterChatRoom,
   searchUsers,
   getImageUrl,
+  leaveChatRoom
 } from "../api";
 import { useChat } from "../contexts/ChatContext"; // Import useChat
 import ChatMobileFrame from "../components/ChatMobileFrame";
@@ -22,6 +23,8 @@ import {
   Box,
   Divider,
   ListItemButton,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import "../styles/ChatMUI.css";
@@ -35,6 +38,35 @@ const ChatListPage = ({ onRoomSelect }) => {
   const [userSearchResults, setUserSearchResults] = useState([]);
   const { setTotalUnreadCount } = useChat(); // Get setTotalUnreadCount from context
 
+  const [contextMenu, setContextMenu] = useState(null);
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
+
+  const handleContextMenu = (event, roomId) => {
+    event.preventDefault();
+    setSelectedRoomId(roomId);
+    setContextMenu(
+      contextMenu === null
+        ? {
+            mouseX: event.clientX + 2,
+            mouseY: event.clientY - 6,
+          }
+        : null
+    );
+  };
+
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
+    setSelectedRoomId(null);
+  };
+
+  const onLeaveChat = () => {
+    if (selectedRoomId) {
+      handleLeaveChatRoom(selectedRoomId);
+    }
+    handleCloseContextMenu();
+  };
+
+  
   useEffect(() => {
     fetchChatRooms();
     const handleFocus = () => fetchChatRooms();
@@ -84,6 +116,17 @@ const ChatListPage = ({ onRoomSelect }) => {
     () => debounce(performSearch, 300),
     []
   );
+
+  const handleLeaveChatRoom = async (roomId) => {
+    try {
+      await leaveChatRoom(roomId);
+      setChatRooms(prevRooms =>
+        prevRooms.filter(room => room.roomId !== roomId)
+      );
+    } catch (err) {
+      setError("채팅방 나가기에 실패했습니다.");
+    }
+  };
 
   useEffect(() => {
     debouncedSearch(userSearchTerm);
@@ -152,6 +195,7 @@ const ChatListPage = ({ onRoomSelect }) => {
           <ListItemButton
             key={room.roomId}
             onClick={() => onRoomSelect(room.roomId)}
+            onContextMenu={(e) => handleContextMenu(e, room.roomId)}
           >
             <ListItemAvatar>
               <Badge
@@ -179,6 +223,18 @@ const ChatListPage = ({ onRoomSelect }) => {
           </ListItemButton>
         ))}
       </List>
+      <Menu
+        open={contextMenu !== null}
+        onClose={handleCloseContextMenu}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          contextMenu !== null
+            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+            : undefined
+        }
+      >
+        <MenuItem onClick={onLeaveChat}>채팅방 나가기</MenuItem>
+      </Menu>
     </ChatMobileFrame>
   );
 };

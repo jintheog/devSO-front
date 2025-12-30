@@ -9,7 +9,7 @@ const ensureViewCookie = () => {
 	if (typeof document === "undefined") return;
 	if (document.cookie.includes(`${VIEW_COOKIE_NAME}=`)) return;
 
-	// eslint-disable-next-line no-restricted-globals
+	 
 	const vid =
 		typeof crypto !== "undefined" && crypto.randomUUID
 			? crypto.randomUUID()
@@ -144,6 +144,7 @@ export const getChatMessages = (roomId, page = 0, size = 20) =>
 	api.get(`/api/chat/rooms/${roomId}/messages?page=${page}&size=${size}`);
 export const markChatAsRead = (roomId) =>
 	api.post(`/api/chat/rooms/${roomId}/read`);
+export const leaveChatRoom = (roomId) => api.delete(`/api/chat/rooms/${roomId}`);
 
 // 팀 모집 API
 // export const getRecruits = () => api.get("/api/recruits");
