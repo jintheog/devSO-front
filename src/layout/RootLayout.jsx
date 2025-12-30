@@ -4,15 +4,18 @@ import { useAuth } from "../contexts/AuthContext";
 import { useChat } from "../contexts/ChatContext";
 import ChatBubble from "../components/ChatBubble";
 import ChatWidget from "../components/ChatWidget";
+
 export default function RootLayout() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth(); // user 정보를 가져옵니다.
   const { toggleChat } = useChat();
+
   const navLinkStyle = ({ isActive }) => ({
     marginRight: "15px",
     fontWeight: isActive ? "bold" : "normal",
     color: isActive ? "blue" : "black",
     textDecoration: "none",
   });
+
   const buttonStyle = {
     marginRight: "15px",
     fontWeight: "normal",
@@ -24,10 +27,12 @@ export default function RootLayout() {
     fontFamily: "inherit",
     fontSize: "inherit",
   };
+
   const handleChatClick = (e) => {
     e.preventDefault();
     toggleChat();
   };
+
   return (
     <div>
       <nav style={{ padding: "10px", backgroundColor: "#eee" }}>
@@ -37,18 +42,25 @@ export default function RootLayout() {
         <NavLink to="/posts" style={navLinkStyle}>
           최신
         </NavLink>
+
         {isAuthenticated ? (
           <>
-            <NavLink to="/profile" style={navLinkStyle}>
+            <NavLink to="/profile" style={navLinkStyle} end>
               프로필
             </NavLink>
+            
+            {/* 내 작성글 페이지로 가는 링크 추가 */}
+            <NavLink to="/profile/my/posts" style={navLinkStyle}>
+              내 작성글
+            </NavLink>
+
             <NavLink to="/recruits" style={navLinkStyle}>
               팀원 모집
             </NavLink>
             <NavLink to="/posts/new" style={navLinkStyle}>
               새 글 작성
             </NavLink>
-            {/* This link opens the chat widget */}
+
             <a
               href="#"
               onClick={handleChatClick}
@@ -71,10 +83,11 @@ export default function RootLayout() {
           </>
         )}
       </nav>
+
       <div style={{ padding: "20px" }}>
         <Outlet />
       </div>
-      {/* Render chat components if authenticated */}
+
       {isAuthenticated && (
         <>
           <ChatBubble />

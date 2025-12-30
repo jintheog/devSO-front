@@ -177,4 +177,7 @@ export const getContactTypes = () => api.get("/api/recruits/enum/contact");
 export const getDurationTypes = () => api.get("/api/recruits/enum/duration");
 export const getMemberCount = () => api.get("/api/recruits/enum/memberCount");
 
+// profile posts
+export const getUserPostsByUsername = (username) => 
+  api.get(`/api/posts/user/${username}`);
 export default api;
