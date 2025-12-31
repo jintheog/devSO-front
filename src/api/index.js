@@ -9,7 +9,6 @@ const ensureViewCookie = () => {
 	if (typeof document === "undefined") return;
 	if (document.cookie.includes(`${VIEW_COOKIE_NAME}=`)) return;
 
-	 
 	const vid =
 		typeof crypto !== "undefined" && crypto.randomUUID
 			? crypto.randomUUID()
@@ -144,7 +143,8 @@ export const getChatMessages = (roomId, page = 0, size = 20) =>
 	api.get(`/api/chat/rooms/${roomId}/messages?page=${page}&size=${size}`);
 export const markChatAsRead = (roomId) =>
 	api.post(`/api/chat/rooms/${roomId}/read`);
-export const leaveChatRoom = (roomId) => api.delete(`/api/chat/rooms/${roomId}`);
+export const leaveChatRoom = (roomId) =>
+	api.delete(`/api/chat/rooms/${roomId}`);
 
 // 팀 모집 API
 // export const getRecruits = () => api.get("/api/recruits");
@@ -168,6 +168,10 @@ export const updateRecruitComment = (recruitId, commentId, data) => {
 export const deleteRecruitComment = (recruitId, commentId) => {
 	return api.delete(`/api/recruits/${recruitId}/comments/${commentId}`);
 };
+export const getAiChecklist = (recruitId, refresh = false) =>
+	api.get(`api/recruits/${recruitId}/ai-checklist?refresh=${refresh}`);
+export const calculateAiScore = (recruitId, checkedQuestions) =>
+	api.post(`api/recruits/${recruitId}/ai-checklist/score`, checkedQuestions);
 // enum
 export const getPositions = () => api.get("/api/recruits/enum/position");
 export const getTypes = () => api.get("/api/recruits/enum/type");
@@ -178,6 +182,6 @@ export const getDurationTypes = () => api.get("/api/recruits/enum/duration");
 export const getMemberCount = () => api.get("/api/recruits/enum/memberCount");
 
 // profile posts
-export const getUserPostsByUsername = (username) => 
-  api.get(`/api/posts/user/${username}`);
+export const getUserPostsByUsername = (username) =>
+	api.get(`/api/posts/user/${username}`);
 export default api;
