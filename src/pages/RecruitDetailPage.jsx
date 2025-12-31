@@ -38,6 +38,7 @@ export default function RecruitDetailPage() {
 	const [editingCommentId, setEditingCommentId] = useState(null);
 	const [editInput, setEditInput] = useState("");
 	const [replyTo, setReplyTo] = useState(null);
+	const [commentError, setCommentError] = useState("");
 
 	// AI 자가진단 관련 상태
 	const [aiData, setAiData] = useState(null);
@@ -167,17 +168,37 @@ export default function RecruitDetailPage() {
 	};
 
 	const handleCommentSubmit = async () => {
-		if (!commentInput.trim()) return;
+		const trimmedContent = commentInput.trim();
+
+		if (!trimmedContent) return;
+
+		if (trimmedContent.length > 100) {
+			setCommentError(
+				`댓글은 100자 이하여야 합니다. (현재 ${trimmedContent.length}자)`
+			);
+			return;
+		}
+
 		try {
+			// 요청 시작 시 에러 초기화
+			setCommentError("");
+
 			await createRecruitComment(id, {
 				content: commentInput,
 				parentId: replyTo ? replyTo.id : null,
 			});
+
 			setCommentInput("");
 			setReplyTo(null);
 			await fetchData();
 		} catch (err) {
-			alert("댓글 등록에 실패했습니다.");
+			// 백엔드에서 온 에러 메시지 세팅
+			const serverErrorMessage =
+				err.response?.data?.error?.message ||
+				err.response?.data?.message ||
+				"댓글 등록에 실패했습니다.";
+
+			setCommentError(serverErrorMessage);
 		}
 	};
 
@@ -470,7 +491,10 @@ export default function RecruitDetailPage() {
 							id="comment-input-field"
 							type="text"
 							value={commentInput}
-							onChange={(e) => setCommentInput(e.target.value)}
+							onChange={(e) => {
+								setCommentInput(e.target.value);
+								if (commentError) setCommentError("");
+							}}
 							onKeyPress={(e) => e.key === "Enter" && handleCommentSubmit()}
 							placeholder={
 								user
@@ -490,6 +514,13 @@ export default function RecruitDetailPage() {
 							{replyTo ? "답글 등록" : "등록"}
 						</button>
 					</div>
+
+					{/* 에러 메시지 표시 영역 */}
+					{commentError && (
+						<p className="text-red-500 text-xs mt-2 ml-13 animate-pulse">
+							{commentError}
+						</p>
+					)}
 				</div>
 
 				<div className="space-y-8">
@@ -506,6 +537,7 @@ export default function RecruitDetailPage() {
 											height: 40,
 											bgcolor: "#f5f5f5",
 											border: "1px solid #eee",
+											cursor: "pointer",
 										}}
 									>
 										😊
@@ -513,7 +545,12 @@ export default function RecruitDetailPage() {
 									<div className="flex-1">
 										<div className="flex items-center justify-between mb-1.5">
 											<div className="flex items-center gap-2">
-												<span className="font-bold text-[14px] text-gray-800">
+												<span
+													className="font-bold text-[14px] text-gray-800 cursor-pointer hover:underline"
+													onClick={() =>
+														handleProfileClick(comment.author?.username)
+													}
+												>
 													{comment.author?.username}
 												</span>
 												<span className="text-[12px] text-gray-400">
@@ -592,6 +629,7 @@ export default function RecruitDetailPage() {
 													height: 32,
 													bgcolor: "#f5f5f5",
 													border: "1px solid #eee",
+													cursor: "pointer",
 												}}
 											>
 												😊
@@ -599,7 +637,12 @@ export default function RecruitDetailPage() {
 											<div className="flex-1">
 												<div className="flex items-center justify-between mb-1">
 													<div className="flex items-center gap-2">
-														<span className="font-bold text-[13px] text-gray-800">
+														<span
+															className="font-bold text-[13px] text-gray-800 cursor-pointer hover:underline"
+															onClick={() =>
+																handleProfileClick(comment.author?.username)
+															}
+														>
 															{child.author?.username}
 														</span>
 														<span className="text-[11px] text-gray-400">
