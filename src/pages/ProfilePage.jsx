@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { getProfile, getImageUrl, follow, unfollow, getTechStacks } from "../api";
+import {
+  getProfile,
+  getImageUrl,
+  follow,
+  unfollow,
+  getTechStacks,
+} from "../api";
 import FollowListModal from "../components/FollowListModal";
 import Swal from "sweetalert2";
 
@@ -14,7 +20,6 @@ const ProfilePage = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
-  const [isBioExpanded, setIsBioExpanded] = useState(false); // 소개글 펼침 상태
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
     type: "followers",
@@ -35,7 +40,7 @@ const ProfilePage = () => {
         setLoading(true);
         const [profileRes, stackRes] = await Promise.all([
           getProfile(targetUsername),
-          getTechStacks()
+          getTechStacks(),
         ]);
 
         const data = profileRes.data?.data || profileRes.data;
@@ -44,7 +49,8 @@ const ProfilePage = () => {
         if (data && data.skills) {
           data.skills = data.skills.map((mySkill) => {
             const match = allStacks.find(
-              (s) => s.label === mySkill.name || s.value === mySkill.techStackValue
+              (s) =>
+                s.label === mySkill.name || s.value === mySkill.techStackValue
             );
             return {
               ...mySkill,
@@ -106,8 +112,8 @@ const ProfilePage = () => {
   const careers = profileData.careers || [];
   const educations = profileData.educations || [];
   const activities = profileData.activities || [];
-  const skills = profileData.skills || []; 
-  const certis = profileData.certis || []; 
+  const skills = profileData.skills || [];
+  const certis = profileData.certis || [];
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 font-sans bg-[#fbfbfb]">
@@ -116,25 +122,43 @@ const ProfilePage = () => {
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-indigo-900/10 rounded-full blur-3xl"></div>
 
+        {/* ✅ 이미지 클릭 시 포스트 페이지로 이동 */}
         <img
-          src={profileData.profileImageUrl ? getImageUrl(profileData.profileImageUrl) : DEFAULT_AVATAR}
-          className="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-white/30 object-cover shadow-2xl bg-white/20 z-10"
+          src={
+            profileData.profileImageUrl
+              ? getImageUrl(profileData.profileImageUrl)
+              : DEFAULT_AVATAR
+          }
+          className="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-white/30 object-cover shadow-2xl bg-white/20 z-10 cursor-pointer hover:scale-105 transition-transform"
           alt="Profile"
+          onClick={() => navigate(`/profile/${profileData.username}/posts`)}
         />
 
         <div className="flex-grow text-center md:text-left z-10">
           <div className="flex flex-col md:flex-row md:items-end gap-3 mb-2">
-            <h1 className="text-4xl font-black">{profileData.name || profileData.username}</h1>
+            {/* ✅ 이름(아이디) 클릭 시 포스트 페이지로 이동 */}
+            <h1
+              className="text-4xl font-black cursor-pointer hover:text-indigo-100 transition-colors"
+              onClick={() => navigate(`/profile/${profileData.username}/posts`)}
+            >
+              {profileData.name || profileData.username}
+            </h1>
+
             <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-1">
+              {/* ... (이메일 및 포트폴리오 섹션은 기존과 동일) ... */}
               {profileData.email && (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-bold backdrop-blur-sm transition-all">
                   <span>📧 {profileData.email}</span>
                 </div>
               )}
               {profileData.portfolio && (
-                <a 
-                  href={profileData.portfolio.startsWith('http') ? profileData.portfolio : `https://${profileData.portfolio}`} 
-                  target="_blank" 
+                <a
+                  href={
+                    profileData.portfolio.startsWith("http")
+                      ? profileData.portfolio
+                      : `https://${profileData.portfolio}`
+                  }
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold backdrop-blur-sm transition-all"
                 >
@@ -143,30 +167,60 @@ const ProfilePage = () => {
               )}
             </div>
           </div>
-
           <p className="text-xl opacity-90 font-medium mb-6">
             {careers.length > 0 ? careers[0].position : "반갑습니다!"}
           </p>
 
           <div className="flex justify-center md:justify-start gap-10 mb-8 font-bold">
-            <button onClick={() => setModalConfig({ isOpen: true, type: "followers" })} className="flex flex-col items-center md:items-start group transition-all">
-              <span className="text-xs opacity-70 uppercase tracking-widest group-hover:underline">Followers</span>
+            <button
+              onClick={() =>
+                setModalConfig({ isOpen: true, type: "followers" })
+              }
+              className="flex flex-col items-center md:items-start group transition-all"
+            >
+              <span className="text-xs opacity-70 uppercase tracking-widest group-hover:underline">
+                Followers
+              </span>
               <span className="text-2xl">{profileData.followerCount ?? 0}</span>
             </button>
-            <button onClick={() => setModalConfig({ isOpen: true, type: "following" })} className="flex flex-col items-center md:items-start group transition-all">
-              <span className="text-xs opacity-70 uppercase tracking-widest group-hover:underline">Following</span>
-              <span className="text-2xl">{profileData.followingCount ?? 0}</span>
+            <button
+              onClick={() =>
+                setModalConfig({ isOpen: true, type: "following" })
+              }
+              className="flex flex-col items-center md:items-start group transition-all"
+            >
+              <span className="text-xs opacity-70 uppercase tracking-widest group-hover:underline">
+                Following
+              </span>
+              <span className="text-2xl">
+                {profileData.followingCount ?? 0}
+              </span>
             </button>
           </div>
 
           <div className="flex flex-wrap justify-center md:justify-start gap-3">
             {isOwnProfile ? (
-              <button onClick={() => navigate("/profile/edit")} className="px-8 py-3 bg-white text-[#6c5ce7] font-extrabold rounded-xl shadow-lg hover:bg-gray-50 transition-colors">
+              <button
+                onClick={() => navigate("/profile/edit")}
+                className="px-8 py-3 bg-white text-[#6c5ce7] font-extrabold rounded-xl shadow-lg hover:bg-gray-50 transition-colors"
+              >
                 프로필 수정하기
               </button>
             ) : (
-              <button onClick={handleFollowToggle} disabled={followLoading} className={`px-10 py-3 font-extrabold rounded-xl shadow-lg transition-all ${profileData.isFollowing ? "bg-[#2d3436] text-white" : "bg-white text-[#6c5ce7]"}`}>
-                {followLoading ? "..." : profileData.isFollowing ? "언팔로우" : "팔로우"}
+              <button
+                onClick={handleFollowToggle}
+                disabled={followLoading}
+                className={`px-10 py-3 font-extrabold rounded-xl shadow-lg transition-all ${
+                  profileData.isFollowing
+                    ? "bg-[#2d3436] text-white"
+                    : "bg-white text-[#6c5ce7]"
+                }`}
+              >
+                {followLoading
+                  ? "..."
+                  : profileData.isFollowing
+                  ? "언팔로우"
+                  : "팔로우"}
               </button>
             )}
           </div>
@@ -175,16 +229,9 @@ const ProfilePage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-8">
-          {/* --- 소개 섹션 (더 보기 기능 추가) --- */}
-          <section 
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7 cursor-pointer hover:border-indigo-200 transition-all"
-            onClick={() => setIsBioExpanded(!isBioExpanded)}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-black">📝 소개</h2>
-              <span className="text-[10px] text-indigo-400 font-bold">{isBioExpanded ? "접기" : "더 보기"}</span>
-            </div>
-            <p className={`text-gray-600 text-sm italic whitespace-pre-wrap break-all leading-relaxed ${!isBioExpanded ? "line-clamp-3" : ""}`}>
+          <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7">
+            <h2 className="text-lg font-black mb-4">📝 소개</h2>
+            <p className="text-gray-600 text-sm italic whitespace-pre-wrap">
               {profileData.bio || "아직 소개글이 없습니다."}
             </p>
           </section>
@@ -196,10 +243,21 @@ const ProfilePage = () => {
             <div className="flex flex-wrap gap-2">
               {skills.length > 0 ? (
                 skills.map((tech, i) => (
-                  <div key={i} className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-[#6c5ce7] rounded-lg text-xs font-bold border border-indigo-100">
-                    {tech.imageUrl && <img src={tech.imageUrl} className="w-4 h-4 object-contain" alt={tech.name} />}
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-[#6c5ce7] rounded-lg text-xs font-bold border border-indigo-100"
+                  >
+                    {tech.imageUrl && (
+                      <img
+                        src={tech.imageUrl}
+                        className="w-4 h-4 object-contain"
+                        alt={tech.name}
+                      />
+                    )}
                     <span>{tech.name}</span>
-                    <span className="text-[9px] opacity-60 ml-1 border-l border-indigo-200 pl-1">{tech.level}</span>
+                    <span className="text-[9px] opacity-60 ml-1 border-l border-indigo-200 pl-1">
+                      {tech.level}
+                    </span>
                   </div>
                 ))
               ) : (
@@ -216,13 +274,19 @@ const ProfilePage = () => {
               {certis.length > 0 ? (
                 certis.map((cert, i) => (
                   <div key={i} className="border-l-2 border-indigo-100 pl-3">
-                    <h4 className="text-sm font-bold text-gray-800">{cert.certiName}</h4>
+                    <h4 className="text-sm font-bold text-gray-800">
+                      {cert.certiName}
+                    </h4>
                     <p className="text-xs text-gray-500">{cert.issuer}</p>
-                    <p className="text-[10px] text-gray-400">{cert.acquisitionDate}</p>
+                    <p className="text-[10px] text-gray-400">
+                      {cert.acquisitionDate}
+                    </p>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-400 text-xs">등록된 자격증이 없습니다.</p>
+                <p className="text-gray-400 text-xs">
+                  등록된 자격증이 없습니다.
+                </p>
               )}
             </div>
           </section>
@@ -230,7 +294,9 @@ const ProfilePage = () => {
 
         <div className="lg:col-span-2 space-y-8">
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-xl font-black mb-6 text-gray-800 flex items-center gap-2">💼 경력사항</h2>
+            <h2 className="text-xl font-black mb-6 text-gray-800 flex items-center gap-2">
+              💼 경력사항
+            </h2>
             <div className="space-y-8 relative before:absolute before:inset-0 before:left-[11px] before:w-[2px] before:bg-gray-50">
               {careers.length > 0 ? (
                 careers.map((item, idx) => (
@@ -238,37 +304,58 @@ const ProfilePage = () => {
                     <div className="absolute left-0 top-1.5 w-6 h-6 bg-white border-4 border-[#6c5ce7] rounded-full z-10 shadow-sm"></div>
                     <div className="flex justify-between items-start mb-1">
                       <div>
-                        <h3 className="font-bold text-lg text-gray-900">{item.companyName}</h3>
-                        <p className="text-xs text-gray-500">{item.department}</p>
+                        <h3 className="font-bold text-lg text-gray-900">
+                          {item.companyName}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                          {item.department}
+                        </p>
                       </div>
                       <span className="text-xs font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">
                         {item.startDate} ~ {item.endDate || "현재"}
                       </span>
                     </div>
-                    <p className="text-[#6c5ce7] font-bold text-sm mb-2">{item.position}</p>
-                    <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">{item.task}</p>
+                    <p className="text-[#6c5ce7] font-bold text-sm mb-2">
+                      {item.position}
+                    </p>
+                    <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
+                      {item.task}
+                    </p>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-400 text-sm pl-8">등록된 경력이 없습니다.</p>
+                <p className="text-gray-400 text-sm pl-8">
+                  등록된 경력이 없습니다.
+                </p>
               )}
             </div>
           </section>
 
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-xl font-black mb-6 text-gray-800 flex items-center gap-2">🚀 주요 활동</h2>
+            <h2 className="text-xl font-black mb-6 text-gray-800 flex items-center gap-2">
+              🚀 주요 활동
+            </h2>
             <div className="grid grid-cols-1 gap-6">
               {activities.length > 0 ? (
                 activities.map((act, idx) => (
-                  <div key={idx} className="p-5 bg-gray-50 rounded-2xl border border-gray-100">
+                  <div
+                    key={idx}
+                    className="p-5 bg-gray-50 rounded-2xl border border-gray-100"
+                  >
                     <div className="flex justify-between items-start mb-2">
                       <span className="px-2 py-1 bg-indigo-100 text-[#6c5ce7] text-[10px] font-bold rounded-md uppercase">
                         {act.category}
                       </span>
-                      <span className="text-xs text-gray-400 font-medium">{act.duration}</span>
+                      <span className="text-xs text-gray-400 font-medium">
+                        {act.duration}
+                      </span>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">{act.projectName}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{act.content}</p>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                      {act.projectName}
+                    </h3>
+                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+                      {act.content}
+                    </p>
                   </div>
                 ))
               ) : (
@@ -284,8 +371,12 @@ const ProfilePage = () => {
                 educations.map((item, idx) => (
                   <div key={idx} className="p-4 bg-gray-50 rounded-xl">
                     <h3 className="font-bold">{item.schoolName}</h3>
-                    <p className="text-sm text-gray-600">{item.major} {item.status && `(${item.status})`}</p>
-                    <p className="text-xs text-gray-400 mt-1">{item.startDate} ~ {item.endDate}</p>
+                    <p className="text-sm text-gray-600">
+                      {item.major} {item.status && `(${item.status})`}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {item.startDate} ~ {item.endDate}
+                    </p>
                   </div>
                 ))
               ) : (

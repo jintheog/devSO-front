@@ -142,9 +142,6 @@ const ProfilePostPage = () => {
             />
           </button>
           <h2 className="text-3xl font-black mb-1">{profileData?.username}</h2>
-          <p className="text-white/80 text-sm mb-6 max-w-md text-center line-clamp-2 italic">
-            {profileData?.bio ? `"${profileData.bio}"` : "등록된 소개글이 없습니다."}
-          </p>
           <div className="flex justify-center gap-10 mb-8 font-bold">
             <button onClick={() => setModalConfig({ isOpen: true, type: "followers" })} className="flex flex-col items-center">
               <span className="text-xs opacity-70">Followers</span>
