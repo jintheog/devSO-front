@@ -184,4 +184,8 @@ export const getMemberCount = () => api.get("/api/recruits/enum/memberCount");
 // profile posts
 export const getUserPostsByUsername = (username) =>
 	api.get(`/api/posts/user/${username}`);
+
+// AI bio
+export const generateAiBio = (username) => 
+  api.post(`/api/users/${username}/ai-bio`);
 export default api;
