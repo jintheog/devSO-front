@@ -17,11 +17,14 @@ import {
 	updateRecruitComment,
 	deleteRecruitComment,
 	getImageUrl,
+	getAiChecklist,
+	calculateAiScore,
 } from "../api";
 import { useAuth } from "../contexts/AuthContext";
 import { Icon } from "@iconify/react";
 import { Avatar } from "@mui/material";
-
+import AiChecklistModal from "../components/AiChecklistModal";
+import "../styles/AiChecklistModal.css";
 import "react-quill-new/dist/quill.snow.css";
 
 export default function RecruitDetailPage() {
@@ -35,6 +38,31 @@ export default function RecruitDetailPage() {
 	const [editingCommentId, setEditingCommentId] = useState(null);
 	const [editInput, setEditInput] = useState("");
 	const [replyTo, setReplyTo] = useState(null);
+
+	// AI 자가진단 관련 상태
+	const [aiData, setAiData] = useState(null);
+	const [isAiLoading, setIsAiLoading] = useState(false);
+	const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+
+	// AI 점수 계산 핸들러 추가
+	const handleCalculateAiScore = async (checkedQuestions) => {
+		try {
+			const res = await calculateAiScore(id, checkedQuestions);
+			const rawData = res.data.data;
+
+			// 서버에서 온 JSON 문자열을 객체로 변환
+			const parsedData =
+				typeof rawData === "string" ? JSON.parse(rawData) : rawData;
+
+			// 중요: 부모의 aiData를 업데이트하여 모달이 점수를 인지하게 함
+			setAiData(parsedData);
+
+			return parsedData.score; // 점수 반환
+		} catch (err) {
+			console.error("점수 계산 실패", err);
+			throw err;
+		}
+	};
 
 	const [options, setOptions] = useState({
 		types: [],
@@ -80,6 +108,34 @@ export default function RecruitDetailPage() {
 		if (id) fetchData();
 	}, [id]);
 
+	const handleAiChecklist = async (refresh = false) => {
+		if (!user) {
+			alert("로그인이 필요한 서비스입니다.");
+			return;
+		}
+
+		setIsAiModalOpen(true);
+		setIsAiLoading(true);
+
+		try {
+			const res = await getAiChecklist(id, refresh);
+			const rawData = res.data.data;
+			const parsedData =
+				typeof rawData === "string" ? JSON.parse(rawData) : rawData;
+
+			setAiData(parsedData);
+		} catch (err) {
+			console.error("AI 자가진단 실패", err);
+			const errMsg =
+				err.response?.data?.error?.message ||
+				"AI 분석 정보를 가져오지 못했습니다.";
+			alert(errMsg);
+			setIsAiModalOpen(false);
+		} finally {
+			setIsAiLoading(false);
+		}
+	};
+
 	const getLabel = (optionList, serverValue) => {
 		if (
 			!optionList ||
@@ -110,7 +166,6 @@ export default function RecruitDetailPage() {
 		});
 	};
 
-	// 🌟 댓글 등록 (등록 후 전체 데이터를 다시 불러와서 카운트와 목록을 갱신합니다)
 	const handleCommentSubmit = async () => {
 		if (!commentInput.trim()) return;
 		try {
@@ -120,13 +175,12 @@ export default function RecruitDetailPage() {
 			});
 			setCommentInput("");
 			setReplyTo(null);
-			await fetchData(); // 게시글 상세정보(카운트 포함)와 댓글목록 갱신
+			await fetchData();
 		} catch (err) {
 			alert("댓글 등록에 실패했습니다.");
 		}
 	};
 
-	// 🌟 댓글 삭제 (A안: 부모 삭제 시 자식까지 삭제되므로 새로고침이 가장 정확합니다)
 	const handleCommentDelete = async (commentId) => {
 		if (
 			!window.confirm(
@@ -136,7 +190,7 @@ export default function RecruitDetailPage() {
 			return;
 		try {
 			await deleteRecruitComment(id, commentId);
-			await fetchData(); // Soft Delete된 후 카운트가 줄어든 데이터를 새로 가져옴
+			await fetchData();
 		} catch (err) {
 			alert("댓글 삭제에 실패했습니다.");
 		}
@@ -278,27 +332,38 @@ export default function RecruitDetailPage() {
 							</span>
 						</div>
 					</div>
-					{isOwner && (
-						<div className="flex gap-2">
-							<button onClick={handleUpdate} className="detail-action-btn">
-								수정
-							</button>
-							<button
-								onClick={handleDelete}
-								className="detail-action-btn hover:text-red-500"
-							>
-								삭제
-							</button>
-							<button
-								onClick={handleToggleStatus}
-								className="detail-action-btn text-blue-600 bg-blue-50 border-blue-100"
-							>
-								{recruit.status === "OPEN" || recruit.status === 1
-									? "마감하기"
-									: "마감취소"}
-							</button>
-						</div>
-					)}
+
+					<div className="flex gap-2">
+						<button
+							onClick={() => handleAiChecklist(false)}
+							className="ai-analysis-btn"
+						>
+							<Icon icon="hugeicons:ai-cloud" width="16" />
+							<span>AI 자가진단</span>
+						</button>
+
+						{isOwner && (
+							<>
+								<button onClick={handleUpdate} className="detail-action-btn">
+									수정
+								</button>
+								<button
+									onClick={handleDelete}
+									className="detail-action-btn hover:text-red-500"
+								>
+									삭제
+								</button>
+								<button
+									onClick={handleToggleStatus}
+									className="detail-action-btn text-blue-600 bg-blue-50 border-blue-100"
+								>
+									{recruit.status === "OPEN" || recruit.status === 1
+										? "마감하기"
+										: "마감취소"}
+								</button>
+							</>
+						)}
+					</div>
 				</div>
 			</header>
 
@@ -382,7 +447,6 @@ export default function RecruitDetailPage() {
 						{recruit.commentCount || 0}
 					</span>
 				</h3>
-
 				<div className="bg-gray-50 p-5 rounded-2xl flex flex-col gap-3 border border-gray-100 shadow-sm mb-10">
 					{replyTo && (
 						<div className="flex justify-between items-center px-3 py-1.5 bg-blue-50 rounded-lg text-xs font-bold text-blue-600">
@@ -429,7 +493,6 @@ export default function RecruitDetailPage() {
 				</div>
 
 				<div className="space-y-8">
-					{/* 🌟 parentId가 없는 최상위 댓글만 map을 돌립니다. (백엔드 로직과 맞춤) */}
 					{comments
 						.filter((c) => !c.parentId)
 						.map((comment) => (
@@ -513,8 +576,6 @@ export default function RecruitDetailPage() {
 										)}
 									</div>
 								</div>
-
-								{/* 대댓글(자식) 렌더링 */}
 								{comment.children?.map((child) => (
 									<div
 										key={child.id}
@@ -568,19 +629,37 @@ export default function RecruitDetailPage() {
 				</div>
 			</section>
 
+			{/* AI 자가진단 모달 */}
+			<AiChecklistModal
+				isOpen={isAiModalOpen}
+				onClose={() => setIsAiModalOpen(false)}
+				data={aiData}
+				isLoading={isAiLoading}
+				onRefresh={() => handleAiChecklist(true)}
+				onCalculate={handleCalculateAiScore}
+			/>
+
 			<style>{`
         .detail-action-btn {
           padding: 6px 14px; font-size: 13px; font-weight: 700;
           background-color: #f9fafb; border: 1px solid #e5e7eb;
           border-radius: 6px; color: #6b7280; transition: all 0.2s;
+          cursor: pointer;
         }
         .detail-action-btn:hover { background-color: #ffffff; color: #111827; border-color: #d1d5db; }
+				.ai-analysis-btn {
+          display: flex; align-items: center; gap: 6px;
+          padding: 6px 14px; background: #eeefff; color: #4f46e5;
+          border-radius: 8px; font-weight: 700; font-size: 13px;
+          transition: all 0.2s;
+        }
+        .ai-analysis-btn:hover { background: #e0e2ff; transform: translateY(-1px); }
       `}</style>
 		</div>
 	);
 }
 
-function InfoItem({ label, value, isBadge, isStack }) {
+function InfoItem({ label, value, isStack }) {
 	if (isStack && Array.isArray(value)) {
 		return (
 			<div className="flex items-start text-[15px]">
@@ -612,20 +691,7 @@ function InfoItem({ label, value, isBadge, isStack }) {
 	return (
 		<div className="flex items-start text-[15px]">
 			<span className="w-24 text-gray-400 shrink-0 font-medium">{label}</span>
-			<div className="flex flex-wrap gap-2">
-				{isBadge && Array.isArray(value) ? (
-					value.map((v, idx) => (
-						<span
-							key={idx}
-							className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wide"
-						>
-							{v}
-						</span>
-					))
-				) : (
-					<span className="text-gray-800 font-semibold">{displayValue}</span>
-				)}
-			</div>
+			<span className="text-gray-800 font-semibold">{displayValue}</span>
 		</div>
 	);
 }
