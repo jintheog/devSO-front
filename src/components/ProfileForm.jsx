@@ -1,10 +1,11 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect, useRef } from "react";
-import { uploadFile, getImageUrl } from "../api";
+import { uploadFile, getImageUrl, checkEmailDuplicate } from "../api";
+import Swal from "sweetalert2";
 
 const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-const ProfileForm = ({ initialData = {}, onDataChange }) => {
+const ProfileForm = ({ initialData = {}, serverEmail, onDataChange }) => {
   const [formData, setFormData] = useState({
     name: "",
     bio: "",
@@ -14,71 +15,82 @@ const ProfileForm = ({ initialData = {}, onDataChange }) => {
     email: "",
   });
 
-  const [errors, setErrors] = useState({
-    portfolio: "",
-    image: "",
-    email: "",
-    phone: "",
-    bio: "", // bio 에러 추가
-  });
+  const [errors, setErrors] = useState({ email: "", portfolio: "" });
+  const [emailCheckStatus, setEmailCheckStatus] = useState("none");
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
-      setFormData({
-        name: initialData.name || "",
-        bio: initialData.bio || "",
-        profileImageUrl: initialData.profileImageUrl || "",
-        phone: initialData.phone || "",
-        portfolio: initialData.portfolio || "",
-        email: initialData.email || "",
-      });
+      setFormData(initialData);
       if (initialData.profileImageUrl) {
         setPreviewUrl(getImageUrl(initialData.profileImageUrl));
       }
+      // 현재 이메일이 서버 원본 이메일과 동일하면 바로 'available' 처리
+      if (initialData.email === serverEmail && serverEmail !== "") {
+        setEmailCheckStatus("available");
+      } else {
+        setEmailCheckStatus("none");
+      }
     }
-  }, [initialData]);
+  }, [initialData, serverEmail]);
+
+  const handleEmailCheck = async () => {
+    if (!formData.email) return;
+    setEmailCheckStatus("checking");
+    try {
+      const res = await checkEmailDuplicate(formData.email);
+      const isAvailable =
+        res.data?.data?.available === true || res.data?.available === true;
+      if (isAvailable) {
+        setEmailCheckStatus("available");
+        setErrors((prev) => ({ ...prev, email: "" }));
+        Swal.fire({
+          icon: "success",
+          title: "사용 가능",
+          text: "사용 가능한 이메일입니다.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        setEmailCheckStatus("duplicate");
+        setErrors((prev) => ({
+          ...prev,
+          email: "이미 사용 중인 이메일입니다.",
+        }));
+        Swal.fire({
+          icon: "error",
+          title: "중복 확인",
+          text: "이미 사용 중인 이메일입니다.",
+        });
+      }
+    } catch (err) {
+      setEmailCheckStatus("none");
+      Swal.fire({
+        icon: "error",
+        title: "오류",
+        text: "중복 확인 중 에러가 발생했습니다.",
+      });
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let errorMsg = "";
 
-    // 1. 포트폴리오 검증 (URL 또는 이메일 허용)
-    if (name === "portfolio" && value !== "") {
-      const urlPattern =
-        /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,6}\.?)(\/[\w.-]*)*\/?$/i;
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!urlPattern.test(value) && !emailPattern.test(value)) {
-        errorMsg = "유효한 링크(https://) 또는 이메일을 입력해주세요.";
+    if (name === "email") {
+      // 💡 핵심: 입력 중 서버 원본 이메일과 같아지면 다시 available, 다르면 none
+      if (value === serverEmail && serverEmail !== "") {
+        setEmailCheckStatus("available");
+      } else {
+        setEmailCheckStatus("none");
       }
-    }
-
-    // 2. 이메일 유효성 검증
-    if (name === "email" && value !== "") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(value)) {
+      if (value !== "" && !emailRegex.test(value))
         errorMsg = "올바른 이메일 형식이 아닙니다.";
-      }
-    }
-
-    // 3. 전화번호 유효성 검증 (010-0000-0000)
-    if (name === "phone" && value !== "") {
-      const phoneRegex = /^01[016789]-\d{3,4}-\d{4}$/;
-      if (!phoneRegex.test(value)) {
-        errorMsg = "형식(010-0000-0000)을 확인해주세요.";
-      }
-    }
-
-    // 4. 자기소개 글자수 검증 (500자 제한)
-    if (name === "bio") {
-      if (value.length > 500) {
-        errorMsg = "글자수는 500자를 넘을 수 없습니다.";
-      }
     }
 
     setErrors((prev) => ({ ...prev, [name]: errorMsg }));
-
     const newFormData = { ...formData, [name]: value };
     setFormData(newFormData);
     onDataChange(newFormData);
@@ -87,21 +99,6 @@ const ProfileForm = ({ initialData = {}, onDataChange }) => {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    setErrors((prev) => ({ ...prev, image: "" }));
-    const maxSize = 2 * 1024 * 1024;
-    if (file.size > maxSize) {
-      setErrors((prev) => ({
-        ...prev,
-        image: "파일 크기는 2MB를 초과할 수 없습니다.",
-      }));
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => setPreviewUrl(reader.result);
-    reader.readAsDataURL(file);
-
     try {
       const response = await uploadFile(file);
       const relativeUrl = response.data?.data?.url || response.data?.url;
@@ -109,18 +106,15 @@ const ProfileForm = ({ initialData = {}, onDataChange }) => {
         const updatedFormData = { ...formData, profileImageUrl: relativeUrl };
         setFormData(updatedFormData);
         onDataChange(updatedFormData);
+        setPreviewUrl(URL.createObjectURL(file));
       }
     } catch (err) {
-      setErrors((prev) => ({
-        ...prev,
-        image: "이미지 업로드에 실패했습니다.",
-      }));
+      console.error(err);
     }
   };
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
-      {/* Profile Image Section */}
       <div className="flex flex-col items-center space-y-4 md:w-1/3">
         <div
           className="relative group cursor-pointer w-40 h-40 rounded-full overflow-hidden border-4 border-gray-100 shadow-sm"
@@ -129,9 +123,9 @@ const ProfileForm = ({ initialData = {}, onDataChange }) => {
           <img
             src={previewUrl || DEFAULT_AVATAR}
             alt="Profile"
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             <span className="text-white font-semibold text-sm">사진 변경</span>
           </div>
         </div>
@@ -142,19 +136,8 @@ const ProfileForm = ({ initialData = {}, onDataChange }) => {
           accept="image/*"
           className="hidden"
         />
-
-        <div className="text-center">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
-            프로필 사진
-          </label>
-          <p className="text-xs text-gray-500">2MB 이하의 이미지 파일</p>
-          {errors.image && (
-            <p className="text-red-500 text-xs mt-1">{errors.image}</p>
-          )}
-        </div>
       </div>
 
-      {/* Profile Details Section */}
       <div className="flex-1 space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-1">
@@ -163,57 +146,69 @@ const ProfileForm = ({ initialData = {}, onDataChange }) => {
             </label>
             <input
               type="text"
-              name="name"
               value={formData.name}
-              onChange={handleInputChange}
               readOnly
-              className="w-full px-4 py-2 bg-gray-100 text-gray-500 border border-gray-200 rounded-lg cursor-not-allowed focus:outline-none"
+              className="w-full px-4 py-2 bg-gray-100 text-gray-500 border rounded-lg cursor-not-allowed outline-none"
             />
-            <p className="text-xs text-gray-400 mt-1">
-              이름은 수정할 수 없습니다.
-            </p>
           </div>
 
           <div className="space-y-1">
             <label className="block text-sm font-semibold text-gray-700">
               이메일
             </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#6c5ce7] focus:border-transparent outline-none transition-colors ${
-                errors.email
-                  ? "border-red-500 focus:ring-red-200"
-                  : "border-gray-300"
-              }`}
-            />
-            {errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-            )}
+            <div className="flex items-center gap-2">
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className={`flex-1 min-w-0 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#6c5ce7] outline-none transition-colors ${
+                  emailCheckStatus === "available"
+                    ? "border-green-500"
+                    : emailCheckStatus === "duplicate" || errors.email
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
+              />
+              <button
+                type="button"
+                onClick={handleEmailCheck}
+                disabled={emailCheckStatus === "checking"}
+                className="shrink-0 px-4 py-2 bg-gray-800 text-white text-xs font-bold rounded-lg h-[42px] hover:bg-gray-700 transition-colors disabled:bg-gray-400"
+              >
+                {emailCheckStatus === "checking" ? "확인 중..." : "중복 확인"}
+              </button>
+            </div>
+            <div className="min-h-[1.25rem]">
+              {errors.email || emailCheckStatus === "duplicate" ? (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.email || "이미 사용 중인 이메일입니다."}
+                </p>
+              ) : emailCheckStatus === "available" && formData.email ? (
+                <p className="text-green-600 text-xs mt-1">
+                  사용 가능한 이메일입니다.
+                </p>
+              ) : emailCheckStatus === "none" && formData.email ? (
+                <p className="text-gray-400 text-xs mt-1">
+                  중복 확인이 필요합니다.
+                </p>
+              ) : null}
+            </div>
           </div>
+        </div>
 
-          <div className="space-y-1">
-            <label className="block text-sm font-semibold text-gray-700">
-              전화번호
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              placeholder="010-0000-0000"
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#6c5ce7] focus:border-transparent outline-none transition-colors ${
-                errors.phone
-                  ? "border-red-500 focus:ring-red-200"
-                  : "border-gray-300"
-              }`}
-            />
-            {errors.phone && (
-              <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
-            )}
-          </div>
+        <div className="space-y-1">
+          <label className="block text-sm font-semibold text-gray-700">
+            전화번호
+          </label>
+          <input
+            type="text"
+            name="phone"
+            value={formData.phone}
+            onChange={handleInputChange}
+            placeholder="010-1234-5678"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#6c5ce7]"
+          />
         </div>
 
         <div className="space-y-1">
@@ -225,43 +220,9 @@ const ProfileForm = ({ initialData = {}, onDataChange }) => {
             name="portfolio"
             value={formData.portfolio}
             onChange={handleInputChange}
-            placeholder="https://github.com/..."
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#6c5ce7] focus:border-transparent outline-none transition-colors placeholder-gray-400 ${
-              errors.portfolio
-                ? "border-red-500 focus:ring-red-200"
-                : "border-gray-300"
-            }`}
+            placeholder="https://..."
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#6c5ce7]"
           />
-          {errors.portfolio && (
-            <p className="text-red-500 text-xs mt-1">{errors.portfolio}</p>
-          )}
-        </div>
-
-        <div className="space-y-1">
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-semibold text-gray-700">
-              자기 소개
-            </label>
-            {/* 글자수 카운터 표시 */}
-            <span className={`text-[10px] font-bold ${formData.bio.length > 500 ? "text-red-500" : "text-gray-400"}`}>
-              {formData.bio.length} / 500
-            </span>
-          </div>
-          <textarea
-            name="bio"
-            value={formData.bio}
-            onChange={handleInputChange}
-            rows="5"
-            placeholder="자신을 자유롭게 소개해 주세요."
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 outline-none transition-colors resize-none ${
-              errors.bio
-                ? "border-red-500 focus:ring-red-200"
-                : "border-gray-300 focus:ring-[#6c5ce7] focus:border-transparent"
-            }`}
-          />
-          {errors.bio && (
-            <p className="text-red-500 text-xs font-semibold mt-1">{errors.bio}</p>
-          )}
         </div>
       </div>
     </div>

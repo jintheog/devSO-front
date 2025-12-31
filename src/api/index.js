@@ -187,5 +187,10 @@ export const getUserPostsByUsername = (username) =>
 
 // AI bio
 export const generateAiBio = (username) => 
-  api.post(`/api/users/${username}/ai-bio`);
+	api.post(`/api/users/${username}/ai-bio`);
+
+// email verification
+export const checkEmailDuplicate = (email) => {
+  return axios.get(`/api/users/check-email?email=${email}`);
+};
 export default api;
