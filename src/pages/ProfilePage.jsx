@@ -112,7 +112,6 @@ const ProfilePage = () => {
     <div className="max-w-6xl mx-auto px-6 py-10 font-sans bg-[#fbfbfb]">
       {/* --- 프로필 헤더 --- */}
       <header className="bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] text-white rounded-3xl p-8 md:p-12 mb-8 shadow-xl flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
-        {/* 배경 장식 원소 */}
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-indigo-900/10 rounded-full blur-3xl"></div>
 
@@ -125,17 +124,25 @@ const ProfilePage = () => {
         <div className="flex-grow text-center md:text-left z-10">
           <div className="flex flex-col md:flex-row md:items-end gap-3 mb-2">
             <h1 className="text-4xl font-black">{profileData.name || profileData.username}</h1>
-            {/* 🔗 포트폴리오 링크를 이름 옆/아래에 배치 */}
-            {profileData.portfolio && (
-              <a 
-                href={profileData.portfolio.startsWith('http') ? profileData.portfolio : `https://${profileData.portfolio}`} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold backdrop-blur-sm transition-all mb-1 w-fit mx-auto md:mx-0"
-              >
-                <span>🔗 Portfolio / SNS</span>
-              </a>
-            )}
+            
+            {/* 🔗 포트폴리오 및 이메일 섹션 */}
+            <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-1">
+              {profileData.email && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-bold backdrop-blur-sm transition-all">
+                  <span>📧 {profileData.email}</span>
+                </div>
+              )}
+              {profileData.portfolio && (
+                <a 
+                  href={profileData.portfolio.startsWith('http') ? profileData.portfolio : `https://${profileData.portfolio}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold backdrop-blur-sm transition-all"
+                >
+                  <span>🔗 Portfolio / SNS</span>
+                </a>
+              )}
+            </div>
           </div>
 
           <p className="text-xl opacity-90 font-medium mb-6">
