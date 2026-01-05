@@ -10,20 +10,17 @@ const SkillsForm = ({ initialData = [], options = {}, onDataChange }) => {
   const [activeCategory, setActiveCategory] = useState("모두보기");
   const dropdownRef = useRef(null);
   
-  // 백엔드에서 넘어온 전체 기술 스택 리스트
   const { stacks = [] } = options;
 
-  // 🌟 [핵심] 사용자의 데이터와 백엔드 Enum을 매칭하여 최신 아이콘/이름을 가져오는 함수
   const getEnrichedSkill = (skill) => {
     const match = stacks.find(s => s.label === skill.name || s.name === skill.name || s.value === skill.value);
     return {
       ...skill,
       name: match?.label || skill.name,
-      imageUrl: match?.imageUrl || skill.imageUrl || '' // 백엔드 Enum의 최신 아이콘 우선
+      imageUrl: match?.imageUrl || skill.imageUrl || ''
     };
   };
 
-  // 초기 데이터 로드 시 Enum 정보와 합성
   useEffect(() => {
     if (initialData && stacks.length > 0) {
       const enriched = initialData.map(getEnrichedSkill);
@@ -61,6 +58,16 @@ const SkillsForm = ({ initialData = [], options = {}, onDataChange }) => {
     e.preventDefault();
     if (!newSkill.name) return;
 
+    // ✅ 입력 시에도 중복 체크 (직접 타이핑 방지)
+    const isDuplicate = skills.some((s, idx) => 
+      idx !== editingIndex && s.name.toLowerCase() === newSkill.name.toLowerCase()
+    );
+    
+    if (isDuplicate) {
+      alert("이미 추가된 기술입니다.");
+      return;
+    }
+
     let updatedSkills;
     if (editingIndex !== null) {
       updatedSkills = [...skills];
@@ -70,7 +77,7 @@ const SkillsForm = ({ initialData = [], options = {}, onDataChange }) => {
     }
     
     setSkills(updatedSkills);
-    onDataChange(updatedSkills); // 부모 컴포넌트에 전달
+    onDataChange(updatedSkills);
     setNewSkill({ name: '', level: '중', imageUrl: '' });
     setEditingIndex(null);
   };
@@ -81,7 +88,17 @@ const SkillsForm = ({ initialData = [], options = {}, onDataChange }) => {
     onDataChange(updated);
   };
 
+  // 🌟 [수정됨] 드롭다운 목록 필터링 로직
   const filteredStacks = stacks.filter((s) => {
+    // 1. 이미 추가된 기술인지 확인 (이름 또는 라벨 기준)
+    const isAlreadyAdded = skills.some(skill => 
+      skill.name === (s.label || s.name)
+    );
+
+    // 2. 이미 추가된 것이라면 목록에서 제외
+    if (isAlreadyAdded) return false;
+
+    // 3. 카테고리 필터링
     if (activeCategory === "모두보기") return true;
     const categoryMap = { "프론트엔드": "FE", "백엔드": "BE", "모바일": "MOBILE", "기타": "ETC" };
     return s.category === categoryMap[activeCategory];
@@ -93,11 +110,10 @@ const SkillsForm = ({ initialData = [], options = {}, onDataChange }) => {
         <span className="text-[#6c5ce7]">🛠</span> 기술 스택
       </h3>
       
-      {/* 등록된 스킬 배지 리스트 */}
+      {/* 등록된 스킬 배지 리스트 (기존 코드와 동일) */}
       {skills.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-8">
           {skills.map((skill, index) => {
-            // 렌더링 시점에 한 번 더 최신 정보 확인 (안전장치)
             const displaySkill = getEnrichedSkill(skill);
             return (
               <div key={index} className="flex items-center gap-2 bg-[#f8f9fa] border border-[#e9ecef] pl-2 pr-3 py-1.5 rounded-lg shadow-sm hover:border-[#6c5ce7] transition-all group">
@@ -111,7 +127,7 @@ const SkillsForm = ({ initialData = [], options = {}, onDataChange }) => {
         </div>
       )}
 
-      {/* 입력 섹션 */}
+      {/* 입력 섹션 (기존 코드와 동일) */}
       <div className="bg-white rounded-2xl p-6 border-2 border-dashed border-gray-200 hover:border-[#a29bfe] transition-colors">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2 relative" ref={dropdownRef}>
@@ -168,7 +184,9 @@ const SkillsForm = ({ initialData = [], options = {}, onDataChange }) => {
                       <span className="truncate">{s.label || s.name}</span>
                     </button>
                   )) : (
-                    <div className="col-span-2 py-8 text-center text-xs text-gray-400">데이터가 없습니다.</div>
+                    <div className="col-span-2 py-8 text-center text-xs text-gray-400">
+                      {stacks.length > 0 ? "선택할 수 있는 기술이 없습니다." : "데이터가 없습니다."}
+                    </div>
                   )}
                 </div>
               </div>

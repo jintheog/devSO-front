@@ -122,32 +122,38 @@ const ProfilePage = () => {
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-indigo-900/10 rounded-full blur-3xl"></div>
 
-        {/* ✅ 이미지 클릭 시 포스트 페이지로 이동 */}
-        <img
-          src={
-            profileData.profileImageUrl
-              ? getImageUrl(profileData.profileImageUrl)
-              : DEFAULT_AVATAR
-          }
-          className="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-white/30 object-cover shadow-2xl bg-white/20 z-10 cursor-pointer hover:scale-105 transition-transform"
-          alt="Profile"
-          onClick={() => navigate(`/profile/${profileData.username}/posts`)}
-        />
+        {/* ✅ 이미지 및 하단 버튼 섹션 */}
+        <div className="flex flex-col items-center gap-4 z-10">
+          <img
+            src={
+              profileData.profileImageUrl
+                ? getImageUrl(profileData.profileImageUrl)
+                : DEFAULT_AVATAR
+            }
+            className="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-white/30 object-cover shadow-2xl bg-white/20"
+            alt="Profile"
+            // onClick 제거됨
+          />
+
+          {/* ✅ 새로 추가된 '작성한 글 보러가기' 버튼 */}
+          <button
+            onClick={() => navigate(`/profile/${profileData.username}/posts`)}
+            className="px-4 py-2 bg-white/20 hover:bg-white text-white hover:text-[#6c5ce7] text-sm font-bold rounded-lg backdrop-blur-sm transition-all shadow-md border border-white/30"
+          >
+            📝 작성한 글 보러가기
+          </button>
+        </div>
 
         <div className="flex-grow text-center md:text-left z-10">
           <div className="flex flex-col md:flex-row md:items-end gap-3 mb-2">
-            {/* ✅ 이름(아이디) 클릭 시 포스트 페이지로 이동 */}
-            <h1
-              className="text-4xl font-black cursor-pointer hover:text-indigo-100 transition-colors"
-              onClick={() => navigate(`/profile/${profileData.username}/posts`)}
-            >
+            {/* ✅ 이름 클릭 이벤트 제거 */}
+            <h1 className="text-4xl font-black">
               {profileData.name || profileData.username}
             </h1>
 
             <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-1">
-              {/* ... (이메일 및 포트폴리오 섹션은 기존과 동일) ... */}
               {profileData.email && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-bold backdrop-blur-sm transition-all">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-bold backdrop-blur-sm">
                   <span>📧 {profileData.email}</span>
                 </div>
               )}
@@ -167,10 +173,12 @@ const ProfilePage = () => {
               )}
             </div>
           </div>
+
           <p className="text-xl opacity-90 font-medium mb-6">
             {careers.length > 0 ? careers[0].position : "반갑습니다!"}
           </p>
 
+          {/* 팔로워/팔로잉 섹션 (기존과 동일) */}
           <div className="flex justify-center md:justify-start gap-10 mb-8 font-bold">
             <button
               onClick={() =>
