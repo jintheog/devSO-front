@@ -120,3 +120,29 @@
   color: #0095f6;
   font-weight: 600;
 }
+
+/* 입력창과 에러 메시지를 감싸는 그룹 */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px; /* 입력창 간격 조정 */
+  width: 100%;
+}
+
+.input-group input {
+  margin-bottom: 5px !important; /* 기존 margin 제거 혹은 축소 */
+}
+
+/* 빨간색 에러 메시지 스타일 */
+.error-text {
+  color: #ff4d4d;
+  font-size: 12px;
+  text-align: left;
+  padding-left: 5px;
+}
+
+.error-message.general-error {
+  color: #ff4d4d;
+  text-align: center;
+  margin-bottom: 10px;
+}
