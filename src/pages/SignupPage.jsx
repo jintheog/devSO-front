@@ -4,152 +4,158 @@ import "../styles/Auth.css";
 import { signup } from "../api";
 
 const SignupPage = () => {
-	const navigate = useNavigate();
+  const navigate = useNavigate();
 
-	const [formData, setFormData] = useState({
-		username: "",
-		password: "",
-		passwordConfirm: "",
-		name: "",
-		phone: "",
-	});
-	const [error, setError] = useState("");
-	const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    passwordConfirm: "",
+    name: "",
+    phone: "",
+  });
 
-	// 전공 선택지 (예시)
-	const majors = ["컴퓨터공학", "경영학", "전자공학", "국어국문학"];
+  // 개별 필드 에러 메시지를 위한 상태
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
-	const handleChange = (e) => {
-		const { name, value } = e.target;
-		setFormData((prev) => ({ ...prev, [name]: value }));
-		setError("");
-	};
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // 사용자가 타이핑을 시작하면 해당 필드의 에러 메시지 삭제
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setError("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrors({});
+    const newErrors = {};
 
-		// 1. 필수 필드 정의 및 검사 (서버 DTO 필드 기준)
-		const requiredFields = [
-			"username",
-			"password",
-			"passwordConfirm",
-			"name",
-			"phone",
-		];
+    // 1. 클라이언트 유효성 검사 (요구사항 반영)
+    if (formData.password.length < 8) {
+      newErrors.password = "비밀번호는 8자 이상입니다.";
+    }
+    if (formData.password !== formData.passwordConfirm) {
+      newErrors.passwordConfirm = "비밀번호와 비밀번호 확인이 일치하지 않습니다.";
+    }
+    if (!formData.name.trim()) {
+      newErrors.name = "이름은 필수 입니다.";
+    }
+    if (!formData.phone.trim()) {
+      newErrors.phone = "전화번호는 필수 입니다.";
+    }
+    if (formData.username.length < 3 || formData.username.length > 20) {
+      newErrors.username = "사용자명은 3 ~ 20자 입니다.";
+    }
 
-		for (const field of requiredFields) {
-			if (!formData[field]) {
-				setError("모든 필수 항목을 입력해주세요.");
-				return;
-			}
-		}
+    // 에러가 하나라도 있으면 중단
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
-		// 2. 클라이언트 유효성 검사
-		if (formData.password !== formData.passwordConfirm) {
-			setError("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
-			return;
-		}
+    setLoading(true);
 
-		if (formData.password.length < 8) {
-			setError("비밀번호는 최소 8자 이상이어야 합니다.");
-			return;
-		}
+    try {
+      await signup(formData);
+      alert("회원가입이 완료되었습니다. 로그인해주세요.");
+      navigate("/login");
+    } catch (err) {
+      const serverMessage = err.response?.data?.error?.message || "";
+      
+      // 2. 서버 에러 처리 (중복 아이디 등)
+      if (serverMessage.includes("중복") || serverMessage.includes("exists")) {
+        setErrors({ username: "중복된 아이디 입니다." });
+      } else {
+        setErrors({ form: serverMessage || "회원가입에 실패했습니다." });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-		if (formData.username.length < 3 || formData.username.length > 20) {
-			setError("사용자명은 3 ~ 20자 입니다.");
-			return;
-		}
+  return (
+    <div className="auth-container">
+      <div className="auth-box">
+        <h1 className="auth-logo">DEVSO</h1>
+        <p className="auth-subtitle">개발자 SNS</p>
 
-		try {
-			await signup(formData);
-			alert("회원가입이 완료되었습니다. 로그인해주세요.");
-			navigate("/login");
-		} catch (err) {
-			setError(
-				err.response?.data?.error?.message || "회원가입에 실패했습니다."
-			);
-		} finally {
-			setLoading(false);
-		}
-	};
+        <form onSubmit={handleSubmit} className="auth-form">
+          {/* 1. 사용자명 */}
+          <div className="input-group">
+            <input
+              type="text"
+              name="username"
+              placeholder="사용자명 (3~20자, 필수)"
+              value={formData.username}
+              onChange={handleChange}
+            />
+            {errors.username && <span className="error-text">{errors.username}</span>}
+          </div>
 
-	return (
-		<div className="auth-container">
-			<div className="auth-box">
-				<h1 className="auth-logo">DEVSO</h1>
-				<p className="auth-subtitle">개발자 SNS</p>
+          {/* 2. 비밀번호 */}
+          <div className="input-group">
+            <input
+              type="password"
+              name="password"
+              placeholder="비밀번호 (8자 이상, 필수)"
+              value={formData.password}
+              onChange={handleChange}
+            />
+            {errors.password && <span className="error-text">{errors.password}</span>}
+          </div>
 
-				<form onSubmit={handleSubmit} className="auth-form">
-					{/* 1. 사용자명 */}
-					<input
-						type="text"
-						name="username"
-						placeholder="사용자명 (3~20자, 필수)"
-						value={formData.username}
-						onChange={handleChange}
-						required
-						minLength={3}
-						maxLength={20}
-					/>
+          {/* 3. 비밀번호 확인 */}
+          <div className="input-group">
+            <input
+              type="password"
+              name="passwordConfirm"
+              placeholder="비밀번호 확인 (필수)"
+              value={formData.passwordConfirm}
+              onChange={handleChange}
+            />
+            {errors.passwordConfirm && <span className="error-text">{errors.passwordConfirm}</span>}
+          </div>
 
-					{/* 2. 비밀번호 */}
-					<input
-						type="password"
-						name="password"
-						placeholder="비밀번호 (8자 이상, 필수)"
-						value={formData.password}
-						onChange={handleChange}
-						required
-						minLength={8}
-					/>
+          {/* 4. 이름 */}
+          <div className="input-group">
+            <input
+              type="text"
+              name="name"
+              placeholder="이름 (필수)"
+              value={formData.name}
+              onChange={handleChange}
+            />
+            {errors.name && <span className="error-text">{errors.name}</span>}
+          </div>
 
-					{/* 3. 비밀번호 확인 */}
-					<input
-						type="password"
-						name="passwordConfirm"
-						placeholder="비밀번호 확인 (필수)"
-						value={formData.passwordConfirm}
-						onChange={handleChange}
-						required
-						minLength={8}
-					/>
+          {/* 5. 연락처 */}
+          <div className="input-group">
+            <input
+              type="tel"
+              name="phone"
+              placeholder="연락처 (필수)"
+              value={formData.phone}
+              onChange={handleChange}
+            />
+            {errors.phone && <span className="error-text">{errors.phone}</span>}
+          </div>
 
-					{/* 4. 이름 */}
-					<input
-						type="text"
-						name="name"
-						placeholder="이름 (필수)"
-						value={formData.name}
-						onChange={handleChange}
-						required
-					/>
+          {errors.form && <p className="error-message general-error">{errors.form}</p>}
 
-					{/* 5. 연락처 */}
-					<input
-						type="tel"
-						name="phone"
-						placeholder="연락처 (필수)"
-						value={formData.phone}
-						onChange={handleChange}
-						required
-						maxLength={30}
-						pattern="[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}"
-					/>
+          <button type="submit" disabled={loading}>
+            {loading ? "가입 중..." : "가입"}
+          </button>
+        </form>
 
-					{error && <p className="error-message">{error}</p>}
-
-					<button type="submit" disabled={loading}>
-						{loading ? "가입 중..." : "가입"}
-					</button>
-				</form>
-
-				<p className="auth-link">
-					계정이 있으신가요? <Link to="/login">로그인</Link>
-				</p>
-			</div>
-		</div>
-	);
+        <p className="auth-link">
+          계정이 있으신가요? <Link to="/login">로그인</Link>
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default SignupPage;
