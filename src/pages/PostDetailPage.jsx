@@ -551,7 +551,7 @@ const PostDetailPage = () => {
               {post.author?.username ? (
                 <Link
                   className="post-detail-author-link"
-                  to={`/profile/${post.author.username}`}
+                  to={`/profile/${post.author.username}/posts`}
                   aria-label="작성자 프로필로 이동"
                 >
                   <img

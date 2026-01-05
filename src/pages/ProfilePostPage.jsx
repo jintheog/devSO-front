@@ -47,7 +47,10 @@ const ProfilePostPage = () => {
       ])
         .then(([profileRes, techRes, postsRes]) => {
           setProfileData(profileRes.data?.data || profileRes.data);
-          setUserPosts(postsRes.data?.data || []);
+          const posts = postsRes.data?.data || [];
+          // 최신순 정렬 (createdAt 내림차순)
+          const sorted = [...posts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          setUserPosts(sorted);
           setLoading(false);
         })
         .catch((err) => {
