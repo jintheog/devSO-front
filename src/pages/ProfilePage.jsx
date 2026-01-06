@@ -122,30 +122,25 @@ const ProfilePage = () => {
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-indigo-900/10 rounded-full blur-3xl"></div>
 
-        {/* ✅ 이미지 클릭 시 포스트 페이지로 이동 */}
+        {/* ✅ 이미지 클릭 이벤트 제거 */}
         <img
           src={
             profileData.profileImageUrl
               ? getImageUrl(profileData.profileImageUrl)
               : DEFAULT_AVATAR
           }
-          className="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-white/30 object-cover shadow-2xl bg-white/20 z-10 cursor-pointer hover:scale-105 transition-transform"
+          className="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-white/30 object-cover shadow-2xl bg-white/20 z-10"
           alt="Profile"
-          onClick={() => navigate(`/profile/${profileData.username}/posts`)}
         />
 
         <div className="flex-grow text-center md:text-left z-10">
           <div className="flex flex-col md:flex-row md:items-end gap-3 mb-2">
-            {/* ✅ 이름(아이디) 클릭 시 포스트 페이지로 이동 */}
-            <h1
-              className="text-4xl font-black cursor-pointer hover:text-indigo-100 transition-colors"
-              onClick={() => navigate(`/profile/${profileData.username}/posts`)}
-            >
+            {/* ✅ 아이디 클릭 이벤트 제거 */}
+            <h1 className="text-4xl font-black">
               {profileData.name || profileData.username}
             </h1>
 
             <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-1">
-              {/* ... (이메일 및 포트폴리오 섹션은 기존과 동일) ... */}
               {profileData.email && (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-bold backdrop-blur-sm transition-all">
                   <span>📧 {profileData.email}</span>
@@ -176,7 +171,7 @@ const ProfilePage = () => {
               onClick={() =>
                 setModalConfig({ isOpen: true, type: "followers" })
               }
-              className="flex flex-col items-center md:items-start group transition-all"
+              className="flex flex-col items-center md:items-start group transition-all cursor-pointer"
             >
               <span className="text-xs opacity-70 uppercase tracking-widest group-hover:underline">
                 Followers
@@ -187,7 +182,7 @@ const ProfilePage = () => {
               onClick={() =>
                 setModalConfig({ isOpen: true, type: "following" })
               }
-              className="flex flex-col items-center md:items-start group transition-all"
+              className="flex flex-col items-center md:items-start group transition-all cursor-pointer"
             >
               <span className="text-xs opacity-70 uppercase tracking-widest group-hover:underline">
                 Following
@@ -199,10 +194,18 @@ const ProfilePage = () => {
           </div>
 
           <div className="flex flex-wrap justify-center md:justify-start gap-3">
+            {/* ✅ 작성한 포스트 보기 버튼 추가 */}
+            <button
+              onClick={() => navigate(`/profile/${profileData.username}/posts`)}
+              className="px-6 py-3 bg-white/20 hover:bg-white/30 text-white font-extrabold rounded-xl border border-white/30 transition-all shadow-md backdrop-blur-sm cursor-pointer"
+            >
+              📝 작성한 포스트 보기
+            </button>
+
             {isOwnProfile ? (
               <button
                 onClick={() => navigate("/profile/edit")}
-                className="px-8 py-3 bg-white text-[#6c5ce7] font-extrabold rounded-xl shadow-lg hover:bg-gray-50 transition-colors"
+                className="px-8 py-3 bg-white text-[#6c5ce7] font-extrabold rounded-xl shadow-lg hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 프로필 수정하기
               </button>
@@ -210,7 +213,7 @@ const ProfilePage = () => {
               <button
                 onClick={handleFollowToggle}
                 disabled={followLoading}
-                className={`px-10 py-3 font-extrabold rounded-xl shadow-lg transition-all ${
+                className={`px-10 py-3 font-extrabold rounded-xl shadow-lg transition-all cursor-pointer ${
                   profileData.isFollowing
                     ? "bg-[#2d3436] text-white"
                     : "bg-white text-[#6c5ce7]"
@@ -227,6 +230,7 @@ const ProfilePage = () => {
         </div>
       </header>
 
+      {/* --- 메인 콘텐츠 (기존 동일) --- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-8">
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7">
