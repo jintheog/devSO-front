@@ -75,6 +75,7 @@ export const getPost = (id) => api.get(`/api/posts/${id}`);
 export const createPost = (data) => api.post("/api/posts", data);
 export const updatePost = (id, data) => api.put(`/api/posts/${id}`, data);
 export const deletePost = (id) => api.delete(`/api/posts/${id}`);
+export const getWeeklyNewPostCount = () => api.get(`/api/posts/weekly-count`);
 export const recordPostView = (id) => {
 	ensureViewCookie();
 	return api.post(`/api/posts/${id}/view`, null, {

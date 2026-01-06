@@ -11,6 +11,7 @@ import {
 } from "../api";
 import FollowListModal from "../components/FollowListModal";
 import Swal from "sweetalert2";
+import "../styles/PostList.css";
 
 const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
@@ -128,8 +129,22 @@ const ProfilePostPage = () => {
     return getImageUrl(path);
   };
 
-  if (loading || authLoading) return <div className="text-center py-20 text-gray-400 font-bold">로딩 중...</div>;
-  if (!profileData) return <div className="text-center py-20">사용자를 찾을 수 없습니다.</div>;
+  if (loading || authLoading)
+    return (
+      <div className="sns-page">
+        <div className="sns-container">
+          <div className="text-center py-20 text-gray-400 font-bold">로딩 중...</div>
+        </div>
+      </div>
+    );
+  if (!profileData)
+    return (
+      <div className="sns-page">
+        <div className="sns-container">
+          <div className="text-center py-20">사용자를 찾을 수 없습니다.</div>
+        </div>
+      </div>
+    );
 
   const isOwnProfile = currentUser?.username === profileData.username;
   const skills = profileData.skills || [];
@@ -137,11 +152,12 @@ const ProfilePostPage = () => {
   const visibleSkills = showAllSkills ? skills : skills.slice(0, 3);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10 font-sans bg-[#fbfbfb] min-h-screen relative">
+    <div className="sns-page">
+      <div className="sns-container">
+        <div className="max-w-6xl mx-auto font-sans min-h-screen relative">
       
       {/* 프로필 요약 카드 */}
-      <section className="bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] text-white rounded-3xl p-8 md:p-12 mb-10 shadow-xl relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+      <section className="sns-hero-card">
 
         <div className="flex flex-col items-center mt-4 z-10 relative">
           {/* 프로필 이미지 (클릭 이벤트 제거) */}
@@ -316,6 +332,8 @@ const ProfilePostPage = () => {
         username={profileData.username}
         onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
       />
+        </div>
+      </div>
     </div>
   );
 };

@@ -14,6 +14,7 @@ import ActivityForm from "../components/ActivityForm";
 import CertificateForm from "../components/CertificateForm";
 import SkillsForm from "../components/SkillsForm";
 import Swal from "sweetalert2";
+import "../styles/PostList.css";
 
 const ProfileEditPage = () => {
   const navigate = useNavigate();
@@ -168,15 +169,30 @@ const ProfileEditPage = () => {
     }
   };
 
-  if (loading) return <div className="text-center py-20 text-gray-500">로딩 중...</div>;
+  if (loading)
+    return (
+      <div className="sns-page">
+        <div className="sns-container">
+          <div className="text-center py-20 text-gray-500">로딩 중...</div>
+        </div>
+      </div>
+    );
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12 font-sans">
-      <h1 className="text-3xl font-extrabold text-gray-900 mb-8 pb-4 border-b">프로필 수정</h1>
-      
+    <div className="sns-page">
+      <div className="sns-container">
+        <div className="max-w-6xl mx-auto font-sans">
+          <div className="sns-hero-card">
+            <div className="sns-hero-badge">프로필 수정</div>
+            <div className="sns-hero-title">프로필을 최신 정보로 업데이트하세요</div>
+            <div className="sns-hero-subtitle">
+              학력, 경력, 기술 스택을 잘 채워두면 더 많은 기회가 찾아올 수 있어요.
+            </div>
+          </div>
+
       <div className="space-y-8">
-        <section className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">기본 인적 사항</h2>
+        <section className="sns-surface">
+          <h2 className="sns-surface-title">기본 인적 사항</h2>
           <ProfileForm
             initialData={profileData}
             serverEmail={serverEmail}
@@ -186,44 +202,44 @@ const ProfileEditPage = () => {
           />
         </section>
 
-        <section className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">학력</h2>
+        <section className="sns-surface">
+          <h2 className="sns-surface-title">학력</h2>
           < EducationForm initialData={educations} onDataChange={setEducations} />
         </section>
 
-        <section className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">경력</h2>
+        <section className="sns-surface">
+          <h2 className="sns-surface-title">경력</h2>
           <CareerForm initialData={careers} onDataChange={setCareers} />
         </section>
 
-        <section className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">대외 활동</h2>
+        <section className="sns-surface">
+          <h2 className="sns-surface-title">대외 활동</h2>
           <ActivityForm initialData={activities} onDataChange={setActivities} />
         </section>
 
-        <section className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">자격증</h2>
+        <section className="sns-surface">
+          <h2 className="sns-surface-title">자격증</h2>
           <CertificateForm initialData={certis} onDataChange={setCertis} />
         </section>
 
-        <section className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">보유 기술</h2>
+        <section className="sns-surface">
+          <h2 className="sns-surface-title">보유 기술</h2>
           <SkillsForm initialData={skills} options={{ stacks: stackOptions }} onDataChange={setSkills} />
         </section>
 
         {/* 자기소개 섹션 */}
-        <div className="pt-10 border-t-4 border-double">
-          <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4 mb-6">
-            <p className="text-indigo-800 text-sm font-medium">
-              💡 <strong>학력, 경력, 기술 스택 등을 자세히 작성할수록</strong> AI가 더욱 정교하고 풍성한 자기소개를 만들어 드립니다!
-            </p>
-          </div>
-
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-indigo-900">자기소개</h2>
-            <button 
-              onClick={handleAIGenerate} 
-              className="px-6 py-3 bg-indigo-600 text-white rounded-full font-bold shadow-lg hover:bg-indigo-700 transition-all active:scale-95"
+        <section className="sns-surface">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-10">
+            <div>
+              <h2 className="sns-surface-title" style={{ marginBottom: 6 }}>자기소개</h2>
+              <p className="text-sm text-gray-600">
+                💡 학력/경력/기술 스택을 자세히 작성할수록 AI가 더 정교한 소개글을 만들어줘요.
+              </p>
+            </div>
+            <button
+              onClick={handleAIGenerate}
+              className="sns-hero-primary"
+              style={{ boxShadow: "0 10px 22px rgba(79, 70, 229, 0.22)" }}
             >
               ✨ AI로 자동 완성하기
             </button>
@@ -245,7 +261,7 @@ const ProfileEditPage = () => {
               <span className="text-gray-400"> / 500자</span>
             </div>
           </div>
-        </div>
+        </section>
       </div>
 
       <div className="flex justify-end gap-4 mt-12 mb-20">
@@ -256,11 +272,14 @@ const ProfileEditPage = () => {
           취소
         </button>
         <button 
-          className="px-8 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-all shadow-md" 
+          className="sns-hero-primary"
+          style={{ height: 46, padding: "0 22px" }}
           onClick={handleSave}
         >
           전체 저장하기
         </button>
+      </div>
+        </div>
       </div>
     </div>
   );

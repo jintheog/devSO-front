@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../styles/Auth.css";
 import "../styles/Editor.css";
+import "../styles/PostList.css";
 
 import {
   EditorContent,
@@ -685,7 +686,7 @@ const PostCreatePage = () => {
 
   return (
     <div
-      className="auth-container post-create-page"
+      className="sns-page post-create-page"
       onDragOver={(e) => {
         // 파일 드래그 시 브라우저의 기본 동작(파일 열기)을 페이지 레벨에서 차단
         if (e.dataTransfer?.types?.includes("Files")) {
@@ -699,9 +700,18 @@ const PostCreatePage = () => {
         }
       }}
     >
-      <div className={`post-create-shell ${showMarkdown ? "with-markdown" : ""}`}>
-        <div className="auth-box post-create-left" style={{ maxWidth: "1200px" }}>
-          <div className="auth-form">
+      <div className="sns-container">
+        <div className="sns-hero-card">
+          <div className="sns-hero-badge">{isEditMode ? "게시글 수정" : "게시글 작성"}</div>
+          <div className="sns-hero-title">오늘은 어떤 이야기를 공유할까요?</div>
+          <div className="sns-hero-subtitle">
+            개발 경험, 트러블슈팅, 회고까지 — 이미지/마크다운도 바로 붙여넣을 수 있어요.
+          </div>
+        </div>
+
+        <div className={`post-create-shell ${showMarkdown ? "with-markdown" : ""}`}>
+          <div className="sns-surface auth-box post-create-left" style={{ maxWidth: "1200px" }}>
+            <div className="auth-form">
             <input
               type="text"
               placeholder="제목을 입력하세요."
@@ -829,35 +839,15 @@ const PostCreatePage = () => {
             {error && <p className="error-message">{error}</p>}
 
             <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  backgroundColor: "#6c757d",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                }}
-              >
+              <button type="button" onClick={() => navigate(-1)} className="sns-btn" style={{ flex: 1 }}>
                 취소
               </button>
               <button
                 type="button"
                 onClick={handlePublish}
                 disabled={loading || initialLoading || !editor}
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  backgroundColor: "#007bff",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  opacity: loading ? 0.7 : 1,
-                }}
+                className="sns-btn sns-btn-primary"
+                style={{ flex: 1 }}
               >
                 {loading ? (isEditMode ? "수정 중..." : "출간 중...") : (isEditMode ? "수정하기" : "출간하기")}
               </button>
@@ -865,16 +855,8 @@ const PostCreatePage = () => {
                 type="button"
                 onClick={handleToggleMarkdown}
                 disabled={!editor}
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  backgroundColor: "#111",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: !editor ? "not-allowed" : "pointer",
-                  opacity: !editor ? 0.7 : 1,
-                }}
+                className="sns-btn"
+                style={{ flex: 1 }}
               >
                 {showMarkdown ? "Markdown 닫기" : "Markdown 보기"}
               </button>
@@ -886,22 +868,23 @@ const PostCreatePage = () => {
           </div>
         </div>
 
-        {showMarkdown && (
-          <div className="markdown-preview post-create-right">
-            <div className="markdown-preview-header">
-              <div className="markdown-preview-title">현재 Markdown</div>
-              <button type="button" onClick={handleCopyMarkdown}>
-                복사
-              </button>
+          {showMarkdown && (
+            <div className="markdown-preview post-create-right sns-surface">
+              <div className="markdown-preview-header">
+                <div className="markdown-preview-title">현재 Markdown</div>
+                <button type="button" onClick={handleCopyMarkdown} className="sns-btn">
+                  복사
+                </button>
+              </div>
+              <textarea readOnly value={markdownPreview} />
+              <div className="markdown-preview-hint">
+                이미지가 서버 업로드로 들어갔다면 여기서 <code>![](...)</code>의 URL이{" "}
+                <code>/uploads/...</code> 형태로 보입니다. (fallback이면{" "}
+                <code>data:image/...</code>)
+              </div>
             </div>
-            <textarea readOnly value={markdownPreview} />
-            <div className="markdown-preview-hint">
-              이미지가 서버 업로드로 들어갔다면 여기서 <code>![](...)</code>의 URL이{" "}
-              <code>/uploads/...</code> 형태로 보입니다. (fallback이면{" "}
-              <code>data:image/...</code>)
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

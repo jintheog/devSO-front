@@ -1,51 +1,141 @@
 /* ===== 1. 기본 레이아웃 및 폰트 ===== */
+.recruit-page {
+	min-height: 100vh;
+	background: #f8fafc;
+	padding: 28px 0 56px 0;
+}
+
 .recruit-container {
-	max-width: 1200px;
+	max-width: none;
+	width: 100%;
 	margin: 0 auto;
-	padding: 2rem;
+	/* 화면 양끝 여백 최소화 */
+	padding: 0 6px;
 	font-family: "Noto Sans KR", sans-serif;
 	color: #333;
 }
 
 /* ===== 2. 히어로 섹션 (상단 배너) ===== */
-.hero-section {
-	background: linear-gradient(90deg, #6c5ce7 0%, #a29bfe 100%);
-	color: white;
-	padding: 4rem 2rem;
+.recruit-hero {
+	background: radial-gradient(1200px 500px at 30% 40%, rgba(99, 102, 241, 0.55), transparent 60%),
+		linear-gradient(90deg, #0b1023 0%, #0b1f3a 45%, #0a2e47 100%);
+	color: #fff;
 	border-radius: 20px;
-	text-align: center;
-	margin-bottom: 2.5rem;
-	box-shadow: 0 10px 30px rgba(108, 92, 231, 0.2);
+	/* SNS 상단 소개 카드와 동일한 사이즈/여백 */
+	padding: 34px 36px;
+	box-shadow: 0 22px 55px rgba(2, 6, 23, 0.28);
+	margin-bottom: 18px;
+	position: relative;
+	overflow: hidden;
 }
 
-.hero-title {
-	font-size: 2.8rem;
+.recruit-hero::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(120deg, rgba(255, 255, 255, 0.06), transparent 35%);
+	pointer-events: none;
+}
+
+.recruit-hero-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 12px;
+	border-radius: 999px;
+	background: rgba(99, 102, 241, 0.12);
+	border: 1px solid rgba(99, 102, 241, 0.25);
+	color: rgba(255, 255, 255, 0.9);
+	font-size: 12px;
 	font-weight: 800;
-	margin-bottom: 0.8rem;
-	letter-spacing: -1px;
+	position: relative;
+	z-index: 1;
 }
 
-.hero-subtitle {
-	font-size: 1.25rem;
-	margin-bottom: 2rem;
-	opacity: 0.9;
+.recruit-hero-title {
+	margin-top: 14px;
+	font-size: 34px;
+	line-height: 1.15;
+	letter-spacing: -0.8px;
+	margin-bottom: 0;
+	font-weight: 900;
+	position: relative;
+	z-index: 1;
 }
 
-.hero-btn {
-	background-color: white;
-	color: #6c5ce7;
-	font-weight: bold;
-	padding: 0.8rem 1.8rem;
-	border-radius: 10px;
-	border: none;
+.recruit-hero-title-accent {
+	color: #93c5fd;
+}
+
+.recruit-hero-subtitle {
+	margin-top: 10px;
+	color: rgba(255, 255, 255, 0.82);
+	font-size: 14px;
+	line-height: 1.6;
+	position: relative;
+	z-index: 1;
+}
+
+.recruit-hero-actions {
+	margin-top: 16px;
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	position: relative;
+	z-index: 1;
+}
+
+.recruit-hero-primary,
+.recruit-hero-secondary {
+	height: 44px;
+	padding: 0 18px;
+	border-radius: 12px;
+	border: 1px solid transparent;
+	font-weight: 800;
 	cursor: pointer;
-	transition: all 0.3s ease;
-	font-size: 1.1rem;
+	transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease,
+		border-color 0.15s ease;
 }
 
-.hero-btn:hover {
-	background-color: #f0f0f0;
-	transform: translateY(-2px);
+.recruit-hero-primary {
+	background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+	color: #fff;
+	box-shadow: 0 10px 22px rgba(79, 70, 229, 0.35);
+}
+
+.recruit-hero-primary:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 14px 28px rgba(79, 70, 229, 0.45);
+}
+
+.recruit-hero-secondary {
+	background: rgba(255, 255, 255, 0.06);
+	color: rgba(255, 255, 255, 0.92);
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.recruit-hero-secondary:hover {
+	background: rgba(255, 255, 255, 0.09);
+	transform: translateY(-1px);
+}
+
+.recruit-filter-wrapper {
+	background: #fff;
+	border: 1px solid #e5e7eb;
+	border-radius: 16px;
+	padding: 18px 18px 14px 18px;
+	box-shadow: 0 10px 25px rgba(2, 6, 23, 0.06);
+	margin-bottom: 18px;
+}
+
+/* FilterBar 내부 margin 제거 + 하단 라인 약화 */
+.recruit-filter-wrapper .filter-container {
+	margin-bottom: 0;
+}
+
+.recruit-filter-wrapper .type-tabs {
+	border-bottom: 1px solid #eef2f7;
+	margin-bottom: 14px;
 }
 
 /* ===== 3. 필터 영역 ===== */
@@ -152,31 +242,102 @@
 	gap: 1.5rem;
 }
 
+.recruit-section-header {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 8px 2px 2px 2px;
+}
+
+.recruit-section-title {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+}
+
+.recruit-section-bar {
+	width: 4px;
+	height: 20px;
+	border-radius: 999px;
+	background: #6366f1;
+	margin-top: 5px;
+}
+
+.recruit-section-name {
+	font-size: 18px;
+	font-weight: 900;
+	color: #111827;
+	letter-spacing: -0.3px;
+}
+
+.recruit-section-desc {
+	margin-top: 2px;
+	font-size: 12px;
+	color: #6b7280;
+}
+
 .recruit-count {
-	font-size: 1rem;
-	color: #636e72;
+	font-size: 12px;
+	color: #6b7280;
+	font-weight: 700;
 }
 
 .recruit-count span {
-	color: #6c5ce7;
-	font-weight: bold;
+	color: #4f46e5;
+	font-weight: 900;
 }
 
 .recruit-posts {
 	display: grid;
-	gap: 2rem;
+	gap: 18px;
 	/* 8개 데이터 기준: PC에서 4열 2줄로 배치됨 */
 	grid-template-columns: repeat(4, 1fr);
 }
 
+/* 큰 화면에서는 5열로 더 많이 보이게 */
+@media (min-width: 1400px) {
+	.recruit-posts {
+		grid-template-columns: repeat(5, 1fr);
+	}
+}
+
 /* 반응형 그리드 조절 */
 @media (max-width: 1024px) {
+	.recruit-hero {
+		/* SNS 카드보다 살짝만 줄인 tablet 패딩 */
+		padding: 30px 24px;
+	}
+	.recruit-hero-title {
+		font-size: 32px;
+	}
 	.recruit-posts {
 		grid-template-columns: repeat(2, 1fr);
 	}
 }
 
 @media (max-width: 640px) {
+	.recruit-page {
+		padding: 18px 0 40px 0;
+	}
+	.recruit-container {
+		padding: 0 6px;
+	}
+	.recruit-hero {
+		padding: 34px 18px;
+		border-radius: 16px;
+	}
+	.recruit-hero-title {
+		font-size: 30px;
+	}
+	.recruit-hero-actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.recruit-hero-primary,
+	.recruit-hero-secondary {
+		width: 100%;
+	}
 	.recruit-posts {
 		grid-template-columns: 1fr;
 	}

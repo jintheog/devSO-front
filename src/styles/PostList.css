@@ -1,18 +1,236 @@
+/* SNS pages: match Recruit page theme (background + side paddings) */
+.sns-page {
+  /* RootLayout가 기본적으로 20px padding을 주고 있어서, SNS 영역은 recruit처럼 full-bleed로 보이도록 상쇄 */
+  margin: -20px;
+  padding: 28px 0 56px 0;
+  background: #f8fafc;
+  min-height: calc(100vh - 60px);
+}
+
+.sns-container {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 0 25px;
+}
+
+/* SNS banner card (copy Recruit hero tone) */
+.sns-hero-card {
+  background: radial-gradient(1100px 420px at 30% 35%, rgba(99, 102, 241, 0.55), transparent 60%),
+    linear-gradient(90deg, #0b1023 0%, #0b1f3a 45%, #0a2e47 100%);
+  color: #fff;
+  border-radius: 20px;
+  padding: 34px 36px;
+  box-shadow: 0 22px 55px rgba(2, 6, 23, 0.28);
+  margin-bottom: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sns-hero-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.06), transparent 35%);
+  pointer-events: none;
+}
+
+.sns-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 12px;
+  font-weight: 800;
+  position: relative;
+  z-index: 1;
+}
+
+.sns-hero-title {
+  margin-top: 14px;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.8px;
+  line-height: 1.15;
+  position: relative;
+  z-index: 1;
+}
+
+.sns-hero-subtitle {
+  margin-top: 10px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.6;
+  position: relative;
+  z-index: 1;
+}
+
+.sns-hero-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.sns-hero-primary {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(79, 70, 229, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sns-hero-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(79, 70, 229, 0.45);
+}
+
+/* surfaces (match Recruit filter wrapper/card tone) */
+.sns-surface {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(2, 6, 23, 0.06);
+  padding: 18px;
+}
+
+.sns-surface-title {
+  font-size: 16px;
+  font-weight: 900;
+  color: #111827;
+  margin-bottom: 12px;
+  letter-spacing: -0.2px;
+}
+
+/* SNS / Recruit unified buttons */
+.sns-btn {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #111827;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.sns-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.06);
+  border-color: rgba(79, 70, 229, 0.25);
+}
+
+.sns-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.sns-btn-primary {
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(79, 70, 229, 0.22);
+}
+
+.sns-btn-primary:hover {
+  box-shadow: 0 14px 28px rgba(79, 70, 229, 0.32);
+  border-color: transparent;
+}
+
 .post-list-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
 }
 
+.post-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.post-list-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.post-list-header-after-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-list-header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* SNS header tabs (fixed position/size) */
+.sns-header {
+  padding: 6px 0 18px 0;
+}
+
+.sns-header-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #eef2f7;
+  padding-bottom: 8px;
+}
+
+.sns-header-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  height: 44px;
+  text-decoration: none;
+  color: #adb5bd; /* 비활성: 연한 회색 */
+  font-size: 28px; /* 스샷의 큰 탭 텍스트 느낌 */
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  border-bottom: 3px solid transparent; /* underline 자리 고정 */
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.sns-header-tab:hover {
+  color: #495057;
+}
+
+.sns-header-tab.active {
+  color: #212529; /* 활성: 진한 글자 */
+  border-bottom-color: #212529; /* 스샷처럼 진한 underline */
+}
+
 .post-list-title {
-  margin-bottom: 30px;
+  margin: 0;
   font-size: 28px;
   font-weight: 700;
   color: #333;
 }
 
 .post-list-search {
-  margin: -12px 0 22px 0;
+  margin: 14px 0 22px 0;
 }
 
 .post-list-search-input {
@@ -40,7 +258,7 @@
 .post-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 24px;
+  gap: 18px;
   margin-bottom: 40px;
 }
 
@@ -49,17 +267,17 @@
   flex-direction: column;
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
   text-decoration: none;
   color: inherit;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(2, 6, 23, 0.04);
 }
 
 .post-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 18px 35px rgba(2, 6, 23, 0.10);
   border-color: #d1d5db;
 }
 

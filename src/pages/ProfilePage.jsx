@@ -10,6 +10,7 @@ import {
 } from "../api";
 import FollowListModal from "../components/FollowListModal";
 import Swal from "sweetalert2";
+import "../styles/PostList.css";
 
 const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
@@ -104,9 +105,21 @@ const ProfilePage = () => {
   };
 
   if (loading || authLoading)
-    return <div className="text-center py-20 font-bold">로딩 중...</div>;
+    return (
+      <div className="sns-page">
+        <div className="sns-container">
+          <div className="text-center py-20 font-bold">로딩 중...</div>
+        </div>
+      </div>
+    );
   if (!profileData)
-    return <div className="text-center py-20">프로필을 찾을 수 없습니다.</div>;
+    return (
+      <div className="sns-page">
+        <div className="sns-container">
+          <div className="text-center py-20">프로필을 찾을 수 없습니다.</div>
+        </div>
+      </div>
+    );
 
   const isOwnProfile = currentUser?.username === profileData.username;
   const careers = profileData.careers || [];
@@ -116,11 +129,11 @@ const ProfilePage = () => {
   const certis = profileData.certis || [];
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10 font-sans bg-[#fbfbfb]">
+    <div className="sns-page">
+      <div className="sns-container">
+        <div className="max-w-6xl mx-auto font-sans">
       {/* --- 프로필 헤더 --- */}
-      <header className="bg-gradient-to-r from-[#6c5ce7] to-[#a29bfe] text-white rounded-3xl p-8 md:p-12 mb-8 shadow-xl flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-indigo-900/10 rounded-full blur-3xl"></div>
+      <header className="sns-hero-card flex flex-col md:flex-row items-center gap-8">
 
         {/* ✅ 이미지 클릭 이벤트 제거 */}
         <img
@@ -129,11 +142,11 @@ const ProfilePage = () => {
               ? getImageUrl(profileData.profileImageUrl)
               : DEFAULT_AVATAR
           }
-          className="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-white/30 object-cover shadow-2xl bg-white/20 z-10"
+          className="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-white/20 object-cover shadow-2xl bg-white/10"
           alt="Profile"
         />
 
-        <div className="flex-grow text-center md:text-left z-10">
+        <div className="flex-grow text-center md:text-left">
           <div className="flex flex-col md:flex-row md:items-end gap-3 mb-2">
             {/* ✅ 아이디 클릭 이벤트 제거 */}
             <h1 className="text-4xl font-black">
@@ -162,11 +175,11 @@ const ProfilePage = () => {
               )}
             </div>
           </div>
-          <p className="text-xl opacity-90 font-medium mb-6">
+          <p className="text-base opacity-90 font-medium mt-3">
             {careers.length > 0 ? careers[0].position : "반갑습니다!"}
           </p>
 
-          <div className="flex justify-center md:justify-start gap-10 mb-8 font-bold">
+          <div className="flex justify-center md:justify-start gap-10 mt-6 font-bold">
             <button
               onClick={() =>
                 setModalConfig({ isOpen: true, type: "followers" })
@@ -193,7 +206,7 @@ const ProfilePage = () => {
             </button>
           </div>
 
-          <div className="flex flex-wrap justify-center md:justify-start gap-3">
+          <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-6">
             {/* ✅ 작성한 포스트 보기 버튼 추가 */}
             <button
               onClick={() => navigate(`/profile/${profileData.username}/posts`)}
@@ -397,6 +410,8 @@ const ProfilePage = () => {
         username={profileData.username}
         onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
       />
+        </div>
+      </div>
     </div>
   );
 };

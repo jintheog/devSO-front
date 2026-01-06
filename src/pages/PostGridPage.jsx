@@ -65,6 +65,10 @@ const PostGridPage = ({
   emptyText = "게시글이 없습니다.",
   enableSearch = false,
   searchPlaceholder = "제목, 내용, 작성자 검색",
+  headerAfterTitle = null,
+  headerRight = null,
+  showHeader = true,
+  wrapContainer = true,
 }) => {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(0);
@@ -147,25 +151,38 @@ const PostGridPage = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loading, hasMore, loadMore]);
 
+  const Wrapper = ({ children }) =>
+    wrapContainer ? <div className="post-list-container">{children}</div> : <>{children}</>;
+
   if (loading && posts.length === 0) {
     return (
-      <div className="post-list-container">
+      <Wrapper>
         <div className="post-list-loading">로딩 중...</div>
-      </div>
+      </Wrapper>
     );
   }
 
   if (error) {
     return (
-      <div className="post-list-container">
+      <Wrapper>
         <div style={{ padding: "20px", color: "red" }}>{error}</div>
-      </div>
+      </Wrapper>
     );
   }
 
   return (
-    <div className="post-list-container">
-      <h1 className="post-list-title">{title}</h1>
+    <Wrapper>
+      {showHeader && (
+        <div className="post-list-header">
+          <div className="post-list-header-left">
+            <h1 className="post-list-title">{title}</h1>
+            {headerAfterTitle && (
+              <div className="post-list-header-after-title">{headerAfterTitle}</div>
+            )}
+          </div>
+          {headerRight && <div className="post-list-header-right">{headerRight}</div>}
+        </div>
+      )}
       {enableSearch && (
         <div className="post-list-search">
           <input
@@ -253,7 +270,7 @@ const PostGridPage = ({
           )}
         </>
       )}
-    </div>
+    </Wrapper>
   );
 };
 

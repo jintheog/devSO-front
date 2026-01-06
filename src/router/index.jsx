@@ -4,6 +4,7 @@ import SignupPage from "../pages/SignupPage.jsx";
 import LoginPage from "../pages/LoginPage.jsx";
 import KakaoCallback from "../pages/KakaoCallback.jsx";
 import PostCreatePage from "../pages/PostCreatePage.jsx";
+import SnsLayoutPage from "../pages/SnsLayoutPage.jsx";
 import RecentPostListPage from "../pages/RecentPostListPage.jsx";
 import PostDetailPage from "../pages/PostDetailPage.jsx";
 import FeedPage from "../pages/FeedPage.jsx";
@@ -32,30 +33,36 @@ const router = createBrowserRouter([
 		),
 		children: [
 			{
-				index: true,
-				element: <RecentPostListPage />,
-			},
-			{
-				path: "posts",
-				element: <RecentPostListPage />,
-			},
-			{
-				path: "trending",
-				element: <TrendingPage />,
+				// SNS(=최신) 영역: 헤더 탭 고정 + 아래만 라우팅으로 교체
+				element: <SnsLayoutPage />,
+				children: [
+					{
+						index: true,
+						element: <RecentPostListPage />,
+					},
+					{
+						path: "posts",
+						element: <RecentPostListPage />,
+					},
+					{
+						path: "trending",
+						element: <TrendingPage />,
+					},
+					{
+						path: "feed",
+						element: (
+							<PrivateRoutes>
+								<FeedPage />
+							</PrivateRoutes>
+						),
+					},
+				],
 			},
 			{
 				path: "posts/new",
 				element: (
 					<PrivateRoutes>
 						<PostCreatePage />
-					</PrivateRoutes>
-				),
-			},
-			{
-				path: "feed",
-				element: (
-					<PrivateRoutes>
-						<FeedPage />
 					</PrivateRoutes>
 				),
 			},

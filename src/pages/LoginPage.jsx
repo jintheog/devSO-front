@@ -55,7 +55,7 @@ const LoginPage = () => {
           <input
             type="text"
             name="username"
-            placeholder="학번"
+            placeholder="아이디"
             value={formData.username}
             onChange={handleChange}
             required
