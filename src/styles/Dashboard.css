@@ -9,6 +9,30 @@
   margin-bottom: 0;
 }
 
+.dash-hero-brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.dash-hero-devso {
+  font-size: 22px;
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.dash-hero-tagline {
+  font-size: 22px;
+  font-weight: 1000;
+  color: rgba(255, 255, 255, 0.78);
+  letter-spacing: -0.2px;
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+  padding-left: 14px;
+}
+
 .dash-hero-title {
   margin-top: 14px;
   font-size: 34px;
@@ -265,6 +289,15 @@
 }
 
 @media (max-width: 520px) {
+  .dash-hero-brand {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .dash-hero-tagline {
+    border-left: none;
+    padding-left: 0;
+  }
   .dash-card {
     flex-basis: 320px;
     width: 320px;

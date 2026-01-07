@@ -185,7 +185,10 @@ export default function DashboardPage() {
 		<div className="sns-page">
 			<div className="sns-container dash-page">
 				<div className="sns-hero-card dash-hero">
-					<div className="sns-hero-badge">DEVSO</div>
+					<div className="dash-hero-brand">
+						<div className="dash-hero-devso">DEVSO</div>
+						<div className="dash-hero-tagline">Developers&apos; Social Networking Service</div>
+					</div>
 					<div className="dash-hero-title">대시보드</div>
 					<div className="dash-hero-subtitle">
 						게시글 · 팀원모집 · 인기 유저를 한 번에 둘러보세요.
