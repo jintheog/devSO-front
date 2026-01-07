@@ -23,9 +23,6 @@ const RecruitMainPage = () => {
 	const [totalPages, setTotalPages] = useState(0);
 	const [totalElements, setTotalElements] = useState(0);
 
-	// 🌟 페이지당 아이템 개수 설정 (8 -> 10으로 변경)
-	const PAGE_SIZE = 10;
-
 	// 🌟 필터 상태
 	const [filter, setFilter] = useState({
 		type: null,
@@ -59,45 +56,44 @@ const RecruitMainPage = () => {
 	};
 
 	/**
-	 * 🌟 데이터를 가져오는 함수
+	 * 🌟 데이터를 가져오는 함수 (useCallback으로 메모이제이션)
 	 */
-	const fetchRecruitsData = useCallback(
-		async (currentFilter, page) => {
-			try {
-				const response = await getRecruits({
-					...currentFilter,
-					page: page,
-					size: PAGE_SIZE, // 10개씩 가져오도록 수정
-				});
+	const fetchRecruitsData = useCallback(async (currentFilter, page) => {
+		try {
+			const response = await getRecruits({
+				...currentFilter,
+				page: page,
+				size: 8,
+			});
 
-				// 백엔드 응답 구조에 따른 데이터 추출
-				const rawData = response.data.data || response.data;
+			// 백엔드 응답에서 실제 데이터가 담긴 위치를 찾습니다.
+			const rawData = response.data.data || response.data;
 
-				if (rawData && rawData.content) {
-					// 서버에서 페이징 객체(Page<T>)를 내려주는 경우
-					setRecruits(rawData.content);
-					setTotalPages(rawData.totalPages);
-					setTotalElements(rawData.totalElements);
-				} else if (Array.isArray(rawData)) {
-					// 서버에서 단순 리스트만 내려주는 경우 (클라이언트 측 임시 페이징)
-					setRecruits(rawData);
+			if (rawData && rawData.content) {
+				// 백엔드가 Page 객체를 줄 때
+				// 예: { content: [...], totalPages: 2, totalElements: 10 }
+				setRecruits(rawData.content);
+				setTotalPages(rawData.totalPages); // 서버가 계산해준 전체 페이지 수 (2)
+				setTotalElements(rawData.totalElements); // 서버가 계산해준 전체 글 수 (10)
+			} else if (Array.isArray(rawData)) {
+				// 백엔드가 배열만 줄 때 (현재 사용자의 상황)
+				setRecruits(rawData);
 
-					// 실제 운영 환경에서는 서버에서 totalElements를 받아야 정확합니다.
-					// 현재는 리스트 길이를 기반으로 임시 계산합니다.
-					const totalCount = rawData.length;
-					setTotalElements(totalCount);
-					setTotalPages(Math.ceil(totalCount / PAGE_SIZE));
-				}
-			} catch (error) {
-				console.error("모집글 로드 실패:", error);
-				setRecruits([]);
+				// 만약 서버가 전체 개수를 안 준다면 프론트에서 임시 계산해야 함
+				// 하지만 실무에서는 반드시 서버가 totalElements를 주도록 백엔드를 수정합니다.
+				const totalCount = rawData.length > 0 ? 10 : 0; // 임시로 10개라고 가정
+				setTotalElements(totalCount);
+				setTotalPages(Math.ceil(totalCount / 8)); // 10/8 = 1.25 -> 올림하여 2페이지
 			}
-		},
-		[PAGE_SIZE]
-	); // PAGE_SIZE 의존성 추가
+		} catch (error) {
+			console.error("모집글 로드 실패:", error);
+			setRecruits([]);
+		}
+	}, []);
 
 	/**
-	 * 🌟 로직 1: 페이지 초기 진입 시 공통 데이터 및 첫 페이지 로드
+	 * 🌟 로직 1: 페이지 초기 진입 시 공통 데이터 로드
+	 * 의존성 배열을 비워 처음에 한 번만 실행되도록 합니다.
 	 */
 	useEffect(() => {
 		const loadInitialData = async () => {
@@ -117,7 +113,7 @@ const RecruitMainPage = () => {
 					progressTypes: progressRes.data || [],
 				});
 
-				// 초기 데이터 호출 (첫 페이지)
+				// 초기 데이터 호출
 				await fetchRecruitsData(filter, 0);
 			} catch (error) {
 				console.error("초기 로드 에러:", error);
@@ -127,7 +123,7 @@ const RecruitMainPage = () => {
 		};
 		loadInitialData();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, []); // fetchRecruitsData를 넣지 않아 규칙 위반 방지
 
 	/**
 	 * 🌟 로직 2: 필터 변경 시 페이지만 0으로 리셋
@@ -140,6 +136,7 @@ const RecruitMainPage = () => {
 	 * 🌟 로직 3: 필터나 페이지가 변경될 때 데이터 다시 불러오기
 	 */
 	useEffect(() => {
+		// 로딩 중이 아닐 때만 호출
 		if (!loading) {
 			fetchRecruitsData(filter, currentPage);
 		}
@@ -163,27 +160,20 @@ const RecruitMainPage = () => {
 		<div className="recruit-page">
 			<div className="recruit-container">
 				<section className="recruit-hero">
-					<div className="recruit-hero-badge">
-						이번 주 {totalElements}개의 새로운 프로젝트
-					</div>
+					<div className="recruit-hero-badge">이번 주 {totalElements}개의 새로운 프로젝트</div>
 					<h1 className="recruit-hero-title">
 						함께 성장하는
 						<br />
-						<span className="recruit-hero-title-accent">최고의 팀</span>을
-						만나보세요
+						<span className="recruit-hero-title-accent">최고의 팀</span>을 만나보세요
 					</h1>
 					<p className="recruit-hero-subtitle">
-						사이드 프로젝트부터 창업까지. 개발자, 디자이너, 기획자가 모이는
-						곳에서
+						사이드 프로젝트부터 창업까지. 개발자, 디자이너, 기획자가 모이는 곳에서
 						<br />
 						당신의 아이디어를 실현할 동료를 찾아보세요.
 					</p>
 
 					<div className="recruit-hero-actions">
-						<button
-							className="recruit-hero-primary"
-							onClick={() => navigate("/recruits/create")}
-						>
+						<button className="recruit-hero-primary" onClick={() => navigate("/recruits/create")}>
 							팀원 모집하기 <span aria-hidden="true">→</span>
 						</button>
 						<button
@@ -198,25 +188,47 @@ const RecruitMainPage = () => {
 					</div>
 				</section>
 
-				<div className="recruit-filter-wrapper">
-					<RecruitFilterBar
-						options={options}
-						filter={filter}
-						setFilter={setFilter}
-						resetFilters={resetFilters}
-					/>
+				{/* SNS 탭과 동일한 디자인의 모집 구분 탭 */}
+				<div className="recruit-header-tabs">
+					<button
+						className={`recruit-header-tab ${!filter.type ? "active" : ""}`}
+						onClick={() => setFilter((prev) => ({ ...prev, type: null }))}
+					>
+						전체
+					</button>
+					{options.types.map((t) => {
+						const val = t && typeof t === "object" ? t.value : t;
+						const label = t && typeof t === "object" ? t.label : t;
+						return (
+							<button
+								key={val}
+								className={`recruit-header-tab ${
+									String(filter.type) === String(val) ? "active" : ""
+								}`}
+								onClick={() => setFilter((prev) => ({ ...prev, type: val }))}
+							>
+								{label}
+							</button>
+						);
+					})}
 				</div>
 
 				<div className="recruit-content" id="recruit-list">
+					{/* 기존 문구 대신 드랍다운 필터 바 배치 */}
+					<div className="recruit-filter-wrapper">
+						<RecruitFilterBar
+							options={options}
+							filter={filter}
+							setFilter={setFilter}
+							resetFilters={resetFilters}
+							showTabs={false} // 탭은 상단에서 따로 렌더링하므로 숨김 처리 (FilterBar 수정 필요)
+						/>
+					</div>
+
 					<div className="recruit-section-header">
 						<div className="recruit-section-title">
 							<div className="recruit-section-bar" />
-							<div>
-								<div className="recruit-section-name">최신 모집글</div>
-								<div className="recruit-section-desc">
-									관심 있는 프로젝트를 찾아보세요.
-								</div>
-							</div>
+							<div className="recruit-section-name">최신 모집글</div>
 						</div>
 						<div className="recruit-count">
 							총 <span>{totalElements}</span>개

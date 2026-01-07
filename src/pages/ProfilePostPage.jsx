@@ -10,7 +10,8 @@ import {
   unfollow,
   getRecruits,
   getTypes,
-  getPositions
+  getPositions,
+  toggleBookmark
 } from "../api";
 import FollowListModal from "../components/FollowListModal";
 import RecruitCard from "../components/RecruitCard";
@@ -140,6 +141,26 @@ const ProfilePostPage = () => {
       Swal.fire("오류", errorMsg, "error");
     } finally {
       setFollowLoading(false);
+    }
+  };
+
+  const handleRecruitBookmarkClick = async (recruitId) => {
+    if (!currentUser) {
+      Swal.fire("알림", "로그인이 필요합니다.", "info");
+      return;
+    }
+
+    try {
+      const response = await toggleBookmark(recruitId);
+      const isBookmarked = response.data?.data;
+      setUserRecruits((prev) =>
+        prev.map((r) =>
+          r.id === recruitId ? { ...r, bookmarked: isBookmarked } : r
+        )
+      );
+    } catch (error) {
+      console.error("북마크 실패:", error);
+      Swal.fire("오류", "북마크 처리에 실패했습니다.", "error");
     }
   };
 
@@ -384,7 +405,7 @@ const ProfilePostPage = () => {
                   recruit={recruit}
                   options={recruitOptions}
                   onClick={() => navigate(`/recruits/${recruit.id}`)}
-                  // 북마크 클릭 핸들러는 필요에 따라 추가 가능 (현재는 표시 위주)
+                  onBookmarkClick={() => handleRecruitBookmarkClick(recruit.id)}
                 />
               ))}
             </div>
