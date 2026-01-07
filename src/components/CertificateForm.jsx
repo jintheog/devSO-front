@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
+import { swal } from "../utils/swal";
 
 const CertificateForm = ({ initialData = [], onDataChange }) => {
   const [certificates, setCertificates] = useState(initialData);
@@ -27,7 +28,7 @@ const CertificateForm = ({ initialData = [], onDataChange }) => {
     e.preventDefault();
 
     if (!newCertificate.certiName) {
-      alert('자격증명을 입력해주세요.');
+      swal.warn('자격증명을 입력해주세요.');
       return;
     }
 

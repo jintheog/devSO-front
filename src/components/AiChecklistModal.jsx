@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import "../styles/AiChecklistModal.css";
+import { swal } from "../utils/swal";
 
 const AiChecklistModal = ({
 	isOpen,
@@ -44,7 +45,7 @@ const AiChecklistModal = ({
 			// onCalculate 호출 시 백엔드에서 점수를 계산하고 data 상태를 업데이트함
 			await onCalculate(checkedQuestions);
 		} catch (error) {
-			alert("점수 계산 중 오류가 발생했습니다.");
+			swal.error("오류", "점수 계산 중 오류가 발생했습니다.");
 		} finally {
 			setIsCalculating(false);
 		}

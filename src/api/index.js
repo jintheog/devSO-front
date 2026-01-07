@@ -1,5 +1,6 @@
 import axios from "axios";
 import { data } from "react-router-dom";
+import { swal } from "../utils/swal";
 
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
@@ -46,13 +47,20 @@ api.interceptors.request.use(
 );
 
 // 응답 인터셉터 - 에러 처리
+let hasShownAuthNotice = false;
 api.interceptors.response.use(
 	(response) => response,
 	(error) => {
 		console.error("API Error:", error.response || error.message);
 		if (error.response?.status === 401) {
 			localStorage.removeItem("token");
-			window.location.href = "/login";
+			if (!hasShownAuthNotice) {
+				hasShownAuthNotice = true;
+				swal.toast({ icon: "info", title: "로그인이 필요합니다. 다시 로그인해주세요." });
+			}
+			setTimeout(() => {
+				window.location.href = "/login";
+			}, 400);
 		}
 		return Promise.reject(error);
 	}

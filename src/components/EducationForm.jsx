@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
+import { swal } from "../utils/swal";
 
 const EducationForm = ({ initialData = [], onDataChange }) => {
   const [educations, setEducations] = useState(initialData);
@@ -28,7 +29,7 @@ const EducationForm = ({ initialData = [], onDataChange }) => {
     e.preventDefault();
 
     if (!newEducation.schoolName) {
-      alert('학교/교육명을 입력해주세요.');
+      swal.warn('학교/교육명을 입력해주세요.');
       return;
     }
 

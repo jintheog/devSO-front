@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Select from "react-select";
 import ReactQuill, { Quill } from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
+import { swal } from "../utils/swal";
+
 import "../styles/PostList.css";
 
 import {
@@ -159,7 +161,7 @@ export default function RecruitCreatePage() {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		if (content.replace(/<(.|\n)*?>/g, "").trim().length === 0) {
-			alert("내용을 입력해주세요.");
+			swal.warn("내용을 입력해주세요.");
 			return;
 		}
 
@@ -181,16 +183,16 @@ export default function RecruitCreatePage() {
 		try {
 			if (isEditMode) {
 				await updateRecruit(editData.id, payload);
-				alert("수정되었습니다.");
+				await swal.success("수정되었습니다.");
 				navigate(`/recruits/${editData.id}`, { replace: true });
 			} else {
 				const res = await createRecruit(payload);
-				alert("등록되었습니다.");
+				await swal.success("등록되었습니다.");
 				navigate(`/recruits/${res.data.data.id}`);
 			}
 		} catch (err) {
 			console.error("전송 에러:", err);
-			alert("처리에 실패했습니다.");
+			swal.error("처리에 실패했습니다.");
 		}
 	};
 

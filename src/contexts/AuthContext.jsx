@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMe, logout as logoutApi } from '../api';
+import { swal } from '../utils/swal';
 
 const AuthContext = createContext(null);
 
@@ -40,7 +41,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       localStorage.removeItem('token');
       setUser(null);
-      alert('로그아웃 되었습니다.');
+      swal.toast({ icon: "success", title: "로그아웃 되었습니다." });
       navigate('/login');
     }
   };

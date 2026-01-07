@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/Auth.css";
 import { signup } from "../api";
+import { swal } from "../utils/swal";
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ const SignupPage = () => {
 
     try {
       await signup(formData);
-      alert("회원가입이 완료되었습니다. 로그인해주세요.");
+      await swal.success("회원가입 완료", "로그인해주세요.");
       navigate("/login");
     } catch (err) {
       const serverMessage = err.response?.data?.error?.message || "";

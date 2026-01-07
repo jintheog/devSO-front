@@ -2,6 +2,7 @@ import React from "react";
 import { Icon } from "@iconify/react";
 import { getImageUrl } from "../api/index.js";
 import { useNavigate } from "react-router-dom";
+import { swal } from "../utils/swal";
 
 const RecruitCard = ({
 	recruit = {},
@@ -56,7 +57,7 @@ const RecruitCard = ({
 
 	const handleCardClick = () => {
 		if (isExpired) {
-			alert("마감된 모집글입니다.");
+			swal.info("마감된 모집글입니다.");
 			return;
 		}
 		onClick();

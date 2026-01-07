@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
+import { swal } from "../utils/swal";
 
 const ActivityForm = ({ initialData = [], onDataChange }) => {
   const [activities, setActivities] = useState(initialData);
@@ -43,7 +44,7 @@ const ActivityForm = ({ initialData = [], onDataChange }) => {
     e.preventDefault();
 
     if (!newActivity.projectName) {
-      alert('프로젝트 이름을 입력해주세요.');
+      swal.warn('프로젝트 이름을 입력해주세요.');
       return;
     }
 

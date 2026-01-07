@@ -26,6 +26,7 @@ import { Avatar } from "@mui/material";
 import AiChecklistModal from "../components/AiChecklistModal";
 import "../styles/AiChecklistModal.css";
 import "react-quill-new/dist/quill.snow.css";
+import { swal } from "../utils/swal";
 
 export default function RecruitDetailPage() {
 	const { id } = useParams();
@@ -111,7 +112,7 @@ export default function RecruitDetailPage() {
 
 	const handleAiChecklist = async (refresh = false) => {
 		if (!user) {
-			alert("로그인이 필요한 서비스입니다.");
+			swal.info("로그인이 필요합니다.", "로그인 후 이용해주세요.");
 			return;
 		}
 
@@ -130,7 +131,7 @@ export default function RecruitDetailPage() {
 			const errMsg =
 				err.response?.data?.error?.message ||
 				"AI 분석 정보를 가져오지 못했습니다.";
-			alert(errMsg);
+			swal.error("AI 자가진단 실패", errMsg);
 			setIsAiModalOpen(false);
 		} finally {
 			setIsAiLoading(false);
@@ -203,17 +204,18 @@ export default function RecruitDetailPage() {
 	};
 
 	const handleCommentDelete = async (commentId) => {
-		if (
-			!window.confirm(
-				"댓글을 삭제하시겠습니까? (답글이 있는 경우 답글도 함께 삭제됩니다)"
-			)
-		)
-			return;
+		const ok = await swal.confirm({
+			title: "댓글 삭제",
+			text: "댓글을 삭제하시겠습니까? (답글이 있는 경우 답글도 함께 삭제됩니다)",
+			confirmButtonText: "삭제",
+			cancelButtonText: "취소",
+		});
+		if (!ok) return;
 		try {
 			await deleteRecruitComment(id, commentId);
 			await fetchData();
 		} catch (err) {
-			alert("댓글 삭제에 실패했습니다.");
+			swal.error("삭제 실패", "댓글 삭제에 실패했습니다.");
 		}
 	};
 
@@ -230,7 +232,7 @@ export default function RecruitDetailPage() {
 			setEditingCommentId(null);
 			fetchData();
 		} catch (err) {
-			alert("댓글 수정에 실패했습니다.");
+			swal.error("수정 실패", "댓글 수정에 실패했습니다.");
 		}
 	};
 
@@ -243,10 +245,11 @@ export default function RecruitDetailPage() {
 
 	const handleBookmarkToggle = async () => {
 		if (!user) {
-			alert("로그인이 필요한 서비스입니다.");
+			swal.info("로그인이 필요합니다.", "로그인 후 이용해주세요.");
 			return;
 		}
 		try {
+			const nextBookmarked = !recruit.bookmarked;
 			await toggleBookmark(id);
 			setRecruit((prev) => ({
 				...prev,
@@ -255,20 +258,31 @@ export default function RecruitDetailPage() {
 					? prev.bookmarkCount - 1
 					: prev.bookmarkCount + 1,
 			}));
+			swal.toast({
+				icon: "success",
+				title: nextBookmarked ? "북마크에 저장했어요." : "북마크를 해제했어요.",
+			});
 		} catch (err) {
 			console.error("북마크 실패", err);
+			swal.error("오류", "북마크 처리에 실패했습니다.");
 		}
 	};
 
 	const handleDelete = async () => {
-		if (window.confirm("작성하신 글을 삭제 하시겠어요?")) {
-			try {
-				await deleteRecruit(id);
-				alert("삭제되었습니다.");
-				navigate("/recruits", { replace: true });
-			} catch (err) {
-				alert("삭제 실패");
-			}
+		const ok = await swal.confirm({
+			title: "모집글 삭제",
+			text: "작성하신 글을 삭제 하시겠어요?",
+			confirmButtonText: "삭제",
+			cancelButtonText: "취소",
+		});
+		if (!ok) return;
+
+		try {
+			await deleteRecruit(id);
+			swal.toast({ icon: "success", title: "삭제되었습니다." });
+			navigate("/recruits", { replace: true });
+		} catch (err) {
+			swal.error("삭제 실패", "삭제에 실패했습니다.");
 		}
 	};
 
@@ -277,18 +291,20 @@ export default function RecruitDetailPage() {
 
 	const handleToggleStatus = async () => {
 		const isClosing = recruit.status === "OPEN" || recruit.status === 1;
-		if (
-			window.confirm(
-				isClosing ? "모집을 마감하시겠습니까?" : "모집을 다시 시작하시겠습니까?"
-			)
-		) {
-			try {
-				await toggleStatus(id);
-				alert("상태가 변경되었습니다.");
-				fetchData();
-			} catch (err) {
-				alert("상태 변경 실패");
-			}
+		const ok = await swal.confirm({
+			title: "상태 변경",
+			text: isClosing ? "모집을 마감하시겠습니까?" : "모집을 다시 시작하시겠습니까?",
+			confirmButtonText: isClosing ? "마감" : "재개",
+			cancelButtonText: "취소",
+		});
+		if (!ok) return;
+
+		try {
+			await toggleStatus(id);
+			swal.toast({ icon: "success", title: "상태가 변경되었습니다." });
+			fetchData();
+		} catch (err) {
+			swal.error("상태 변경 실패", "상태 변경에 실패했습니다.");
 		}
 	};
 

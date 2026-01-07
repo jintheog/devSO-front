@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
+import { swal } from "../utils/swal";
 
 const CareerForm = ({ initialData = [], onDataChange }) => {
   const [careers, setCareers] = useState(initialData);
@@ -31,7 +32,7 @@ const CareerForm = ({ initialData = [], onDataChange }) => {
     e.preventDefault();
 
     if (!newCareer.companyName) {
-      alert('회사명을 입력해주세요.');
+      swal.warn('회사명을 입력해주세요.');
       return;
     }
 
