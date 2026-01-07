@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { login, getMe } from "../api";
 import "../styles/Auth.css";
+import "../styles/PostList.css";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -47,51 +48,57 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-box">
-        <h1 className="auth-logo">DEVSO</h1>
+    <div className="sns-page auth-page">
+      <div className="sns-container">
+        <div className="sns-surface auth-surface">
+          <div className="auth-logo-hero-wrap" aria-hidden="true">
+            <div className="auth-logo-hero" data-text="DevSo">DevSo</div>
+          </div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <input
-            type="text"
-            name="username"
-            placeholder="아이디"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="비밀번호"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-          {error && <p className="error-message">{error}</p>}
-          <button type="submit" disabled={loading}>
-            {loading ? "로그인 중..." : "로그인"}
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="input-group">
+              <input
+                type="text"
+                name="username"
+                placeholder="아이디"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="input-group">
+              <input
+                type="password"
+                name="password"
+                placeholder="비밀번호"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {error && <p className="error-message">{error}</p>}
+
+            <div className="auth-actions">
+              <button className="sns-btn sns-btn-primary" type="submit" disabled={loading}>
+                {loading ? "로그인 중..." : "로그인"}
+              </button>
+            </div>
+          </form>
+
+          <div className="divider">
+            <span>또는</span>
+          </div>
+
+          <button type="button" onClick={handleKakaoLogin} className="kakao-login-btn">
+            <span className="kakao-icon">K</span>
+            카카오로 로그인
           </button>
-        </form>
 
-        {/* 구분선 */}
-        <div className="divider">
-          <span>또는</span>
+          <p className="auth-link">
+            계정이 없으신가요? <Link to="/signup">가입하기</Link>
+          </p>
         </div>
-
-        {/* 카카오 로그인 버튼 */}
-        <button
-          type="button"
-          onClick={handleKakaoLogin}
-          className="kakao-login-btn"
-        >
-          <span className="kakao-icon">K</span>
-          카카오로 로그인
-        </button>
-
-        <p className="auth-link">
-          계정이 없으신가요? <Link to="/signup">가입하기</Link>
-        </p>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/Auth.css";
+import "../styles/PostList.css";
 import { signup } from "../api";
 import { swal } from "../utils/swal";
 
@@ -78,82 +79,93 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-box">
-        <h1 className="auth-logo">DEVSO</h1>
-        <p className="auth-subtitle">개발자 SNS</p>
-
-        <form onSubmit={handleSubmit} className="auth-form">
-          {/* 1. 사용자명 */}
-          <div className="input-group">
-            <input
-              type="text"
-              name="username"
-              placeholder="사용자명 (3~20자, 필수)"
-              value={formData.username}
-              onChange={handleChange}
-            />
-            {errors.username && <span className="error-text">{errors.username}</span>}
+    <div className="sns-page auth-page">
+      <div className="sns-container">
+        <div className="sns-surface auth-surface">
+          <div className="auth-logo-hero-wrap" aria-hidden="true">
+            <div className="auth-logo-hero" data-text="DevSo">DevSo</div>
           </div>
 
-          {/* 2. 비밀번호 */}
-          <div className="input-group">
-            <input
-              type="password"
-              name="password"
-              placeholder="비밀번호 (8자 이상, 필수)"
-              value={formData.password}
-              onChange={handleChange}
-            />
-            {errors.password && <span className="error-text">{errors.password}</span>}
-          </div>
+          <form onSubmit={handleSubmit} className="auth-form">
+            {/* 1. 사용자명 */}
+            <div className="input-group">
+              <input
+                type="text"
+                name="username"
+                placeholder="아이디 (3~20자, 필수)"
+                value={formData.username}
+                onChange={handleChange}
+              />
+              {errors.username && (
+                <span className="error-text">{errors.username}</span>
+              )}
+            </div>
 
-          {/* 3. 비밀번호 확인 */}
-          <div className="input-group">
-            <input
-              type="password"
-              name="passwordConfirm"
-              placeholder="비밀번호 확인 (필수)"
-              value={formData.passwordConfirm}
-              onChange={handleChange}
-            />
-            {errors.passwordConfirm && <span className="error-text">{errors.passwordConfirm}</span>}
-          </div>
+            {/* 2. 비밀번호 */}
+            <div className="input-group">
+              <input
+                type="password"
+                name="password"
+                placeholder="비밀번호 (8자 이상, 필수)"
+                value={formData.password}
+                onChange={handleChange}
+              />
+              {errors.password && (
+                <span className="error-text">{errors.password}</span>
+              )}
+            </div>
 
-          {/* 4. 이름 */}
-          <div className="input-group">
-            <input
-              type="text"
-              name="name"
-              placeholder="이름 (필수)"
-              value={formData.name}
-              onChange={handleChange}
-            />
-            {errors.name && <span className="error-text">{errors.name}</span>}
-          </div>
+            {/* 3. 비밀번호 확인 */}
+            <div className="input-group">
+              <input
+                type="password"
+                name="passwordConfirm"
+                placeholder="비밀번호 확인 (필수)"
+                value={formData.passwordConfirm}
+                onChange={handleChange}
+              />
+              {errors.passwordConfirm && (
+                <span className="error-text">{errors.passwordConfirm}</span>
+              )}
+            </div>
 
-          {/* 5. 연락처 */}
-          <div className="input-group">
-            <input
-              type="tel"
-              name="phone"
-              placeholder="연락처 (필수)"
-              value={formData.phone}
-              onChange={handleChange}
-            />
-            {errors.phone && <span className="error-text">{errors.phone}</span>}
-          </div>
+            {/* 4. 이름 */}
+            <div className="input-group">
+              <input
+                type="text"
+                name="name"
+                placeholder="이름 (필수)"
+                value={formData.name}
+                onChange={handleChange}
+              />
+              {errors.name && <span className="error-text">{errors.name}</span>}
+            </div>
 
-          {errors.form && <p className="error-message general-error">{errors.form}</p>}
+            {/* 5. 연락처 */}
+            <div className="input-group">
+              <input
+                type="tel"
+                name="phone"
+                placeholder="연락처 (필수)"
+                value={formData.phone}
+                onChange={handleChange}
+              />
+              {errors.phone && <span className="error-text">{errors.phone}</span>}
+            </div>
 
-          <button type="submit" disabled={loading}>
-            {loading ? "가입 중..." : "가입"}
-          </button>
-        </form>
+            {errors.form && <p className="error-message general-error">{errors.form}</p>}
 
-        <p className="auth-link">
-          계정이 있으신가요? <Link to="/login">로그인</Link>
-        </p>
+            <div className="auth-actions">
+              <button className="sns-btn sns-btn-primary" type="submit" disabled={loading}>
+                {loading ? "가입 중..." : "가입"}
+              </button>
+            </div>
+          </form>
+
+          <p className="auth-link">
+            계정이 있으신가요? <Link to="/login">로그인</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

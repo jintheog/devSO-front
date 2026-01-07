@@ -1,103 +1,225 @@
-.auth-container {
+/* Auth pages: SNS/Recruit(DevMatch) 테마로 통일 */
+.auth-page .auth-logo-hero-wrap {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 60px);
-  padding: 20px;
+  padding: 8px 0 18px 0;
+  /* Z축(pop-out) 효과를 위한 원근 */
+  perspective: 900px;
 }
 
-.auth-box {
-  background: #fff;
-  border: 1px solid #dbdbdb;
-  border-radius: 4px;
-  padding: 40px;
-  width: 100%;
-  max-width: 350px;
-  text-align: center;
+.auth-page .auth-logo-hero {
+  display: inline-block;
+  position: relative;
+  z-index: 0; /* stacking context for ::before shadow */
+  isolation: isolate;
+  font-size: clamp(56px, 7.5vw, 92px);
+  font-weight: 1000;
+  letter-spacing: -2.2px;
+  line-height: 1;
+  /* 오른쪽으로 살짝 기울이되(베이스라인 유지), 로고처럼 보이게 */
+  transform: skewX(-12deg);
+  transform-origin: left bottom;
+  transform-style: preserve-3d;
+  /* 기본 그라데이션 + 광택(shine) 레이어 */
+  background-image:
+    /* 색이 계속 흐르도록 넓은 그라데이션 */
+    linear-gradient(90deg, #7c3aed 0%, #6366f1 25%, #3b82f6 50%, #22c55e 75%, #7c3aed 100%),
+    linear-gradient(
+      115deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.0) 38%,
+      rgba(255, 255, 255, 0.95) 50%,
+      rgba(255, 255, 255, 0.0) 62%,
+      transparent 100%
+    );
+  background-size: 320% 100%, 70% 100%;
+  background-position: 0% 50%, -120% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* 기본 그림자(살짝) */
+  filter: none;
+  transition: transform 200ms ease, filter 200ms ease;
+  will-change: transform, filter, background-position;
+  cursor: default;
 }
 
-.auth-logo {
-  font-family: 'Lobster', cursive;
-  font-size: 40px;
-  margin-bottom: 20px;
+.auth-page .auth-logo-hero::before {
+  /* hover 시에만 나오는 "DevSo 글자 모양" 그림자 (글자는 투명, 그림자만) */
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: transparent;
+  opacity: 0;
+  /* 살짝 뒤/아래로 떨어진 뒷면 그림자 */
+  transform: translate3d(14px, 22px, -1px);
+  text-shadow: 0 18px 36px rgba(2, 6, 23, 0.26), 0 12px 28px rgba(79, 70, 229, 0.38);
+  transition: opacity 200ms ease, transform 200ms ease;
+  pointer-events: none;
 }
 
-.auth-subtitle {
-  color: #8e8e8e;
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 20px;
+.auth-page .auth-logo-hero:hover {
+  /* 모니터(사용자) 방향 Z축으로 붕 뜨는 느낌 */
+  transform: skewX(-12deg) rotate(-2.2deg) translateZ(26px);
+  /* 그라데이션(색) 지속 변화 + 광택 지속 */
+  animation: authLogoShine 1.15s ease-in-out infinite, authLogoGradient 2.4s linear infinite;
 }
 
-.auth-form {
+.auth-page .auth-logo-hero:hover::before {
+  opacity: 1;
+  transform: translate3d(18px, 28px, -1px);
+}
+
+@keyframes authLogoShine {
+  0% {
+    background-position: 0% 50%, -120% 50%;
+  }
+  100% {
+    background-position: 0% 50%, 180% 50%;
+  }
+}
+
+@keyframes authLogoGradient {
+  0% {
+    background-position: 0% 50%, -120% 50%;
+  }
+  100% {
+    background-position: 100% 50%, -120% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-page .auth-logo-hero {
+    transition: none;
+  }
+  .auth-page .auth-logo-hero:hover {
+    animation: none;
+    transform: skewX(-12deg);
+  }
+}
+
+.auth-page .auth-surface {
+  max-width: 520px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(99, 102, 241, 0.22);
+  box-shadow: 0 14px 34px rgba(2, 6, 23, 0.08);
+}
+
+.auth-page .auth-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px 220px at 20% 0%, rgba(99, 102, 241, 0.12), transparent 60%),
+    radial-gradient(520px 220px at 80% 0%, rgba(59, 130, 246, 0.10), transparent 60%);
+  pointer-events: none;
+}
+
+.auth-page .auth-surface > * {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-page .auth-surface-subtitle {
+  /* SNS 상단 배너(스크린샷) 톤: 어두운 그라데이션 + 흰색 반투명 텍스트 */
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: radial-gradient(900px 260px at 30% 35%, rgba(99, 102, 241, 0.35), transparent 60%),
+    linear-gradient(90deg, #0b1023 0%, #0b1f3a 45%, #0a2e47 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.16);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  line-height: 1.6;
+}
+
+.auth-page .auth-surface-top-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.auth-page .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
-.auth-form input {
-  padding: 10px;
-  border: 1px solid #dbdbdb;
-  border-radius: 4px;
-  font-size: 14px;
-  background: #fafafa;
-}
-
-.auth-form input:focus {
-  outline: none;
-  border-color: #a8a8a8;
-}
-
-.auth-form button {
-  margin-top: 8px;
-  padding: 10px;
-  background: #0095f6;
-  color: #fff;
-  border-radius: 4px;
+.auth-page .auth-form input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f8fafc;
   font-size: 14px;
   font-weight: 600;
+  color: #111827;
+  outline: none;
+  transition: all 0.2s;
 }
 
-.auth-form button:disabled {
-  opacity: 0.5;
+.auth-page .auth-form input:focus {
+  background: #fff;
+  border-color: #c7d2fe;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
-.divider {
+.auth-page .auth-actions {
+  margin-top: 4px;
+  display: flex;
+  justify-content: stretch;
+}
+
+.auth-page .auth-actions .sns-btn {
+  width: 100%;
+}
+
+.auth-page .divider {
   display: flex;
   align-items: center;
   margin: 20px 0;
 }
 
-.divider::before,
-.divider::after {
+.auth-page .divider::before,
+.auth-page .divider::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: #dbdbdb;
+  background: #e5e7eb;
 }
 
-.divider span {
+.auth-page .divider span {
   padding: 0 16px;
-  color: #8e8e8e;
+  color: #6b7280;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 800;
 }
 
-.kakao-login-btn {
+.auth-page .kakao-login-btn {
   width: 100%;
-  padding: 10px;
+  height: 44px;
+  padding: 0 16px;
   background: #fee500;
   color: #000;
-  border-radius: 4px;
+  border-radius: 12px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  cursor: pointer;
 }
 
-.kakao-icon {
+.auth-page .kakao-icon {
   background: #000;
   color: #fee500;
   width: 20px;
@@ -110,27 +232,32 @@
   font-weight: bold;
 }
 
-.auth-link {
+.auth-page .auth-link {
   margin-top: 20px;
   font-size: 14px;
-  color: #8e8e8e;
+  color: #6b7280;
+  text-align: center;
 }
 
-.auth-link a {
-  color: #0095f6;
-  font-weight: 600;
+.auth-page .auth-link a {
+  color: #4f46e5;
+  font-weight: 900;
 }
 
 /* 입력창과 에러 메시지를 감싸는 그룹 */
 .input-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 15px; /* 입력창 간격 조정 */
+  margin-bottom: 0;
   width: 100%;
 }
 
+.auth-page .auth-form .input-group:first-child {
+  margin-top: 16px; /* 아이디 입력칸 위 여백(조금 더) */
+}
+
 .input-group input {
-  margin-bottom: 5px !important; /* 기존 margin 제거 혹은 축소 */
+  margin-bottom: 0 !important;
 }
 
 /* 빨간색 에러 메시지 스타일 */
@@ -139,6 +266,13 @@
   font-size: 12px;
   text-align: left;
   padding-left: 5px;
+}
+
+.auth-page .error-message {
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 800;
+  margin: 4px 0 0 0;
 }
 
 .error-message.general-error {
