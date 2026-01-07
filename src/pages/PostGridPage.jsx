@@ -151,27 +151,8 @@ const PostGridPage = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loading, hasMore, loadMore]);
 
-  const Wrapper = ({ children }) =>
-    wrapContainer ? <div className="post-list-container">{children}</div> : <>{children}</>;
-
-  if (loading && posts.length === 0) {
-    return (
-      <Wrapper>
-        <div className="post-list-loading">로딩 중...</div>
-      </Wrapper>
-    );
-  }
-
-  if (error) {
-    return (
-      <Wrapper>
-        <div style={{ padding: "20px", color: "red" }}>{error}</div>
-      </Wrapper>
-    );
-  }
-
-  return (
-    <Wrapper>
+  const content = (
+    <>
       {showHeader && (
         <div className="post-list-header">
           <div className="post-list-header-left">
@@ -183,6 +164,7 @@ const PostGridPage = ({
           {headerRight && <div className="post-list-header-right">{headerRight}</div>}
         </div>
       )}
+
       {enableSearch && (
         <div className="post-list-search search-bar">
           <span className="search-icon">🔍</span>
@@ -194,7 +176,12 @@ const PostGridPage = ({
           />
         </div>
       )}
-      {posts.length === 0 ? (
+
+      {error ? (
+        <div style={{ padding: "20px", color: "red" }}>{error}</div>
+      ) : loading && posts.length === 0 ? (
+        <div className="post-list-loading">로딩 중...</div>
+      ) : posts.length === 0 ? (
         <div className="post-list-empty">
           {enableSearch && effectiveQuery ? "검색 결과가 없습니다." : emptyText}
         </div>
@@ -212,7 +199,9 @@ const PostGridPage = ({
                   <div className="post-card-body">
                     <h2 className="post-card-title">{post.title}</h2>
                     {post.content && (
-                      <p className="post-card-preview">{getPreviewText(post.content, !!post.imageUrl)}</p>
+                      <p className="post-card-preview">
+                        {getPreviewText(post.content, !!post.imageUrl)}
+                      </p>
                     )}
                   </div>
                   <div className="post-card-relative-time">{getRelativeTime(post.createdAt)}</div>
@@ -271,8 +260,10 @@ const PostGridPage = ({
           )}
         </>
       )}
-    </Wrapper>
+    </>
   );
+
+  return wrapContainer ? <div className="post-list-container">{content}</div> : content;
 };
 
 export default PostGridPage;

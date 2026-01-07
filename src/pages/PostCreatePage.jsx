@@ -149,16 +149,25 @@ const processImageFileInExtension = async (file, editorInstance) => {
   if (!file.type.startsWith("image/")) return false;
   if (file.size > 10 * 1024 * 1024) return false;
 
+  const insertImageNode = (src) => {
+    // NOTE: 이미지 노드가 선택(NodeSelection)된 상태에서 setImage를 쓰면
+    // 기존 이미지가 "교체"될 수 있음. 그래서 항상 문서 끝에 새 노드를 삽입한다.
+    editorInstance
+      .chain()
+      .focus("end")
+      .insertContent([
+        { type: "image", attrs: { src: String(src), alt: file.name } },
+        { type: "paragraph" },
+      ])
+      .run();
+  };
+
   try {
     const uploadResponse = await uploadFile(file);
     const relativeUrl = uploadResponse.data?.data?.url;
     if (relativeUrl) {
       const absoluteUrl = getImageUrl(relativeUrl);
-      editorInstance
-        .chain()
-        .focus()
-        .setImage({ src: absoluteUrl, alt: file.name })
-        .run();
+      insertImageNode(absoluteUrl);
       return true;
     }
   } catch {
@@ -172,7 +181,7 @@ const processImageFileInExtension = async (file, editorInstance) => {
     reader.readAsDataURL(file);
   });
 
-  editorInstance.chain().focus().setImage({ src: String(dataUrl), alt: file.name }).run();
+  insertImageNode(String(dataUrl));
   return true;
 };
 
@@ -268,8 +277,11 @@ const PostCreatePage = () => {
         const absoluteUrl = getImageUrl(relativeUrl);
         editor
           .chain()
-          .focus()
-          .setImage({ src: absoluteUrl, alt: file.name })
+          .focus("end")
+          .insertContent([
+            { type: "image", attrs: { src: absoluteUrl, alt: file.name } },
+            { type: "paragraph" },
+          ])
           .run();
         return;
       }
@@ -286,7 +298,14 @@ const PostCreatePage = () => {
       reader.readAsDataURL(file);
     });
 
-    editor.chain().focus().setImage({ src: String(dataUrl), alt: file.name }).run();
+    editor
+      .chain()
+      .focus("end")
+      .insertContent([
+        { type: "image", attrs: { src: String(dataUrl), alt: file.name } },
+        { type: "paragraph" },
+      ])
+      .run();
   };
 
   // 붙여넣기/드래그&드롭으로 이미지 삽입을 처리하는 확장

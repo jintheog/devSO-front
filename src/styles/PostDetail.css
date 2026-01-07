@@ -16,22 +16,7 @@
   color: #ef4444;
 }
 
-.post-detail-back-button {
-  margin-bottom: 24px;
-  padding: 8px 16px;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #374151;
-  transition: all 0.2s ease;
-}
-
-.post-detail-back-button:hover {
-  background: #e5e7eb;
-  border-color: #d1d5db;
-}
+/* back button styles moved to DetailActions.css */
 
 .post-detail {
   background: white;
@@ -678,6 +663,44 @@
   gap: 12px;
 }
 
+.post-detail-floating-scroll {
+  position: fixed;
+  /* 포스트 본문(max-width: 900px) 오른쪽에 밀착 */
+  left: calc(50% + 500px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+}
+
+.post-detail-scroll-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    radial-gradient(900px 280px at 30% 35%, rgba(99, 102, 241, 0.40), transparent 60%),
+    linear-gradient(90deg, #0b1023 0%, #0b1f3a 45%, #0a2e47 100%);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 18px;
+  font-weight: 1000;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(2, 6, 23, 0.18);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.post-detail-scroll-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.22);
+  filter: brightness(1.02);
+}
+
+.post-detail-scroll-button:active {
+  transform: translateY(0px);
+}
+
 .post-detail-like-button {
   display: flex;
   flex-direction: column;
@@ -742,11 +765,21 @@
   .post-detail-floating-actions {
     left: calc(50% - 480px); /* 작은 화면에서 조정 */
   }
+  .post-detail-floating-scroll {
+    left: calc(50% + 480px);
+  }
 }
 
 @media (max-width: 1024px) {
   .post-detail-floating-actions {
     left: 16px; /* 더 작은 화면에서는 왼쪽에 고정 */
+  }
+  .post-detail-floating-scroll {
+    left: auto;
+    right: 16px;
+    top: auto;
+    bottom: 16px;
+    transform: none;
   }
 }
 
@@ -759,6 +792,14 @@
     flex-direction: row;
     justify-content: center;
     margin-bottom: 24px;
+  }
+
+  .post-detail-floating-scroll {
+    left: auto;
+    right: 12px;
+    top: auto;
+    bottom: 12px;
+    transform: none;
   }
 
   .post-detail-like-button {

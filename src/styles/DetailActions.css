@@ -1,0 +1,85 @@
+/* Shared detail-page actions (PostDetail / RecruitDetail): match DevMatch banner theme */
+.detail-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 16px;
+  margin-bottom: 18px; /* 상세 페이지에서 뒤로가기 버튼 아래 여백 */
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    radial-gradient(900px 280px at 30% 35%, rgba(99, 102, 241, 0.40), transparent 60%),
+    linear-gradient(90deg, #0b1023 0%, #0b1f3a 45%, #0a2e47 100%);
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 1000;
+  font-size: 16px;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(2, 6, 23, 0.18);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.detail-back-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.22);
+  filter: brightness(1.02);
+}
+
+.detail-back-btn:active {
+  transform: translateY(0px);
+}
+
+.detail-actions-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 6px;
+}
+
+.detail-action-btn {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-weight: 1000;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-action-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+
+.detail-action-btn:active {
+  transform: translateY(0px);
+}
+
+.detail-action-primary {
+  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(79, 70, 229, 0.22);
+}
+
+.detail-action-primary:hover {
+  box-shadow: 0 14px 28px rgba(79, 70, 229, 0.30);
+}
+
+.detail-action-secondary {
+  background: linear-gradient(180deg, rgba(31, 41, 55, 0.92) 0%, rgba(17, 24, 39, 0.92) 100%);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.18);
+}
+
+.detail-action-secondary:hover {
+  box-shadow: 0 14px 28px rgba(2, 6, 23, 0.24);
+}
+
+

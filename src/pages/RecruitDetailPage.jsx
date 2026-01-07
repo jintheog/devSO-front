@@ -27,6 +27,7 @@ import AiChecklistModal from "../components/AiChecklistModal";
 import "../styles/AiChecklistModal.css";
 import "react-quill-new/dist/quill.snow.css";
 import { swal } from "../utils/swal";
+import "../styles/DetailActions.css";
 
 export default function RecruitDetailPage() {
 	const { id } = useParams();
@@ -336,11 +337,11 @@ export default function RecruitDetailPage() {
 	return (
 		<div className="max-w-4xl mx-auto px-6 py-10 bg-white min-h-screen">
 			<button
-				onClick={() => navigate("/recruits")}
-				className="mb-8 text-gray-400 hover:text-black transition flex items-center gap-1"
+				onClick={() => navigate(-1)}
+				className="detail-back-btn"
 			>
 				<Icon icon="mdi:arrow-left" width="20" height="20" />
-				<span className="text-sm font-medium">목록으로</span>
+				<span>뒤로가기</span>
 			</button>
 
 			<header className="mb-12">

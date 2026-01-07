@@ -17,6 +17,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import Swal from "sweetalert2";
 import "../styles/PostDetail.css";
+import "../styles/DetailActions.css";
 
 const formatKoreanDateTime = (isoString) => {
   if (!isoString) return "";
@@ -403,8 +404,8 @@ const PostDetailPage = () => {
     return (
       <div className="post-detail-container">
         <div className="post-detail-error">{error}</div>
-        <button onClick={() => navigate(-1)} className="post-detail-back-button">
-          뒤로 가기
+        <button onClick={() => navigate(-1)} className="detail-back-btn">
+          ← 뒤로가기
         </button>
       </div>
     );
@@ -414,8 +415,8 @@ const PostDetailPage = () => {
     return (
       <div className="post-detail-container">
         <div className="post-detail-error">게시글을 찾을 수 없습니다.</div>
-        <button onClick={() => navigate(-1)} className="post-detail-back-button">
-          뒤로 가기
+        <button onClick={() => navigate(-1)} className="detail-back-btn">
+          ← 뒤로가기
         </button>
       </div>
     );
@@ -539,8 +540,35 @@ const PostDetailPage = () => {
         </button>
       </div>
 
-      <button onClick={() => navigate(-1)} className="post-detail-back-button">
-        ← 뒤로 가기
+      {/* Floating scroll buttons (right side) */}
+      <div className="post-detail-floating-scroll">
+        <button
+          type="button"
+          className="post-detail-scroll-button"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="맨 위로"
+          title="맨 위로"
+        >
+          ↑
+        </button>
+        <button
+          type="button"
+          className="post-detail-scroll-button"
+          onClick={() =>
+            window.scrollTo({
+              top: document.documentElement.scrollHeight,
+              behavior: "smooth",
+            })
+          }
+          aria-label="맨 아래로"
+          title="맨 아래로"
+        >
+          ↓
+        </button>
+      </div>
+
+      <button onClick={() => navigate(-1)} className="detail-back-btn">
+        ← 뒤로가기
       </button>
       
       <article className="post-detail">
@@ -605,23 +633,22 @@ const PostDetailPage = () => {
                 <span>{post.viewCount || 0}</span>
               </span>
               {isOwner && (
-                <button
-                  type="button"
-                  className="post-detail-edit-button"
-                  onClick={() => navigate(`/posts/${id}/edit`)}
-                >
-                  수정
-                </button>
-              )}
-              {isOwner && (
-                <button
-                  type="button"
-                  className="post-detail-edit-button"
-                  onClick={handleDeletePost}
-                  style={{ marginLeft: "0.5px" }}
-                >
-                  삭제
-                </button>
+                <span className="detail-actions-inline">
+                  <button
+                    type="button"
+                    className="detail-action-btn detail-action-primary"
+                    onClick={() => navigate(`/posts/${id}/edit`)}
+                  >
+                    수정
+                  </button>
+                  <button
+                    type="button"
+                    className="detail-action-btn detail-action-secondary"
+                    onClick={handleDeletePost}
+                  >
+                    삭제
+                  </button>
+                </span>
               )}
             </div>
           </div>
