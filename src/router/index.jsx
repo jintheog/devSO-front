@@ -17,6 +17,7 @@ import ProfilePostPage from "../pages/ProfilePostPage.jsx";
 import RecruitMainPage from "../pages/RecruitMainPage.jsx";
 import RecruitCreatePage from "../pages/RecruitCreatePage.jsx";
 import RecruitDetailPage from "../pages/RecruitDetailPage.jsx";
+import DashboardPage from "../pages/DashboardPage.jsx";
 import { PublicRoute, PrivateRoutes } from "./ProtectedRoute.jsx";
 import { AuthProvider } from "../contexts/AuthContext.jsx";
 import { ChatProvider } from "../contexts/ChatContext.jsx";
@@ -57,6 +58,10 @@ const router = createBrowserRouter([
 						),
 					},
 				],
+			},
+			{
+				path: "dashboard",
+				element: <DashboardPage />,
 			},
 			{
 				path: "posts/new",

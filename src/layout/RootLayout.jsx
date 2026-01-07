@@ -30,7 +30,7 @@ export default function RootLayout() {
 					{/* Left: Brand + navigation */}
 					<div className="devso-nav-left">
 						<NavLink
-							to="/"
+							to="/dashboard"
 							className="devso-nav-brand"
 						>
 							<span className="devso-nav-brand-text">DevSo</span>
