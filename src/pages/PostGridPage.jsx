@@ -184,7 +184,8 @@ const PostGridPage = ({
         </div>
       )}
       {enableSearch && (
-        <div className="post-list-search">
+        <div className="post-list-search search-bar">
+          <span className="search-icon">🔍</span>
           <input
             className="post-list-search-input"
             value={searchText}

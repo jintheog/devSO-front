@@ -24,8 +24,7 @@ const ProfilePostPage = () => {
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
   
-  // 스킬 더보기 및 스크롤 버튼 상태
-  const [showAllSkills, setShowAllSkills] = useState(false);
+  // 스크롤 버튼 상태
   const [showScrollButtons, setShowScrollButtons] = useState(false);
 
   const [modalConfig, setModalConfig] = useState({
@@ -147,101 +146,97 @@ const ProfilePostPage = () => {
     );
 
   const isOwnProfile = currentUser?.username === profileData.username;
-  const skills = profileData.skills || [];
-  // 더보기 클릭 여부에 따라 노출될 스킬 결정
-  const visibleSkills = showAllSkills ? skills : skills.slice(0, 3);
 
   return (
     <div className="sns-page">
       <div className="sns-container">
         <div className="max-w-6xl mx-auto font-sans min-h-screen relative">
       
-      {/* 프로필 요약 카드 */}
-      <section className="sns-hero-card">
+      {/* 프로필 요약 카드 (ProfilePage와 동일한 디자인) */}
+      <header className="sns-hero-card flex flex-col md:flex-row items-center gap-8">
+        {/* 프로필 이미지 */}
+        <img 
+          src={renderImage(profileData?.profileImageUrl, true)} 
+          alt="Avatar" 
+          className="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-white/20 object-cover shadow-2xl bg-white/10"
+        />
 
-        <div className="flex flex-col items-center mt-4 z-10 relative">
-          {/* 프로필 이미지 (클릭 이벤트 제거) */}
-          <div className="relative mb-4">
-            <img 
-              src={renderImage(profileData?.profileImageUrl || profileData?.avatarUrl, true)} 
-              alt="Avatar" 
-              className="w-28 h-28 rounded-full border-4 border-white/30 object-cover shadow-2xl bg-white/20"
-            />
-          </div>
-          
-          <h2 className="text-3xl font-black mb-2">{profileData?.username}</h2>
+        <div className="flex-grow text-center md:text-left">
+          <div className="flex flex-col md:flex-row md:items-end gap-3 mb-2">
+            <h1 className="text-4xl font-black">
+              {profileData?.name || profileData?.username}
+            </h1>
 
-          {/* 기술 스택 리스트 */}
-          <div className="flex flex-wrap justify-center gap-2 mb-6 max-w-2xl">
-            {visibleSkills.length > 0 ? (
-              visibleSkills.map((tech, i) => (
-                <div key={i} className="flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-md rounded-lg text-[11px] font-bold border border-white/10 transition-all">
-                  {tech.imageUrl && <img src={tech.imageUrl} className="w-3.5 h-3.5 object-contain" alt={tech.name} />}
-                  <span>{tech.name}</span>
+            <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-1">
+              {profileData?.email && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 rounded-full text-xs font-bold backdrop-blur-sm transition-all">
+                  <span>📧 {profileData.email}</span>
                 </div>
-              ))
-            ) : (
-              <span className="text-xs opacity-60">등록된 기술 스택이 없습니다.</span>
-            )}
-            
-            {/* 더보기 / 접기 버튼 */}
-            {!showAllSkills && skills.length > 3 && (
-              <button 
-                onClick={() => setShowAllSkills(true)}
-                className="px-3 py-1 bg-indigo-900/30 hover:bg-indigo-900/50 rounded-lg text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1"
-                title="더보기"
-              >
-                ...외 {skills.length - 3}개
-              </button>
-            )}
-            
-            {showAllSkills && skills.length > 3 && (
-              <button 
-                onClick={() => setShowAllSkills(false)}
-                className="px-3 py-1 bg-indigo-900/30 hover:bg-indigo-900/50 rounded-lg text-[11px] font-bold transition-colors cursor-pointer"
-              >
-                접기
-              </button>
-            )}
+              )}
+              {profileData?.portfolio && (
+                <a
+                  href={
+                    profileData.portfolio.startsWith("http")
+                      ? profileData.portfolio
+                      : `https://${profileData.portfolio}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs font-bold backdrop-blur-sm transition-all"
+                >
+                  <span>🔗 Portfolio / SNS</span>
+                </a>
+              )}
+            </div>
           </div>
 
-          {/* 팔로워/팔로잉 카운트 */}
-          <div className="flex justify-center gap-10 mb-8 font-bold">
+          <p className="text-base opacity-90 font-medium mt-3">
+            {profileData?.careers && profileData.careers.length > 0 
+              ? profileData.careers[0].position 
+              : "반갑습니다!"}
+          </p>
+
+          <div className="flex justify-center md:justify-start gap-10 mt-6 font-bold">
             <button 
               onClick={() => setModalConfig({ isOpen: true, type: "followers" })} 
-              className="flex flex-col items-center group cursor-pointer"
+              className="flex flex-col items-center md:items-start group transition-all cursor-pointer"
             >
-              <span className="text-xs opacity-70 group-hover:underline">Followers</span>
+              <span className="text-xs opacity-70 uppercase tracking-widest group-hover:underline">Followers</span>
               <span className="text-2xl">{profileData.followerCount ?? 0}</span>
             </button>
             <button 
               onClick={() => setModalConfig({ isOpen: true, type: "following" })} 
-              className="flex flex-col items-center group cursor-pointer"
+              className="flex flex-col items-center md:items-start group transition-all cursor-pointer"
             >
-              <span className="text-xs opacity-70 group-hover:underline">Following</span>
+              <span className="text-xs opacity-70 uppercase tracking-widest group-hover:underline">Following</span>
               <span className="text-2xl">{profileData.followingCount ?? 0}</span>
             </button>
           </div>
 
-          {/* 액션 버튼 그룹 */}
-          <div className="flex flex-wrap justify-center gap-3">
-            {/* 프로필 상세보기 버튼 (항상 노출) */}
+          <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-6">
+            {/* 프로필 상세보기 버튼 */}
             <button 
               onClick={() => navigate(`/profile/${profileData.username}`)}
-              className="px-6 py-2.5 bg-white/20 hover:bg-white/30 text-white font-extrabold rounded-xl border border-white/30 transition-all shadow-md backdrop-blur-sm cursor-pointer"
+              className="px-6 py-3 bg-white/20 hover:bg-white/30 text-white font-extrabold rounded-xl border border-white/30 transition-all shadow-md backdrop-blur-sm cursor-pointer"
             >
-              프로필 상세보기
+              👤 프로필 상세보기
             </button>
 
-            {/* 팔로우/언팔로우 버튼 (타인 프로필일 때만) */}
-            {!isOwnProfile && (
+            {isOwnProfile ? (
+              <button
+                onClick={() => navigate("/profile/edit")}
+                className="px-8 py-3 bg-white text-[#6c5ce7] font-extrabold rounded-xl shadow-lg hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                프로필 수정하기
+              </button>
+            ) : (
               <button 
                 onClick={handleFollowToggle} 
                 disabled={followLoading}
-                className={`px-10 py-2.5 font-extrabold rounded-xl shadow-lg transition-all cursor-pointer ${
+                className={`px-10 py-3 font-extrabold rounded-xl shadow-lg transition-all cursor-pointer ${
                   profileData.isFollowing 
-                  ? "bg-[#2d3436] text-white hover:bg-black" 
-                  : "bg-white text-[#6c5ce7] hover:bg-gray-50"
+                  ? "bg-[#2d3436] text-white" 
+                  : "bg-white text-[#6c5ce7]"
                 }`}
               >
                 {followLoading ? "..." : profileData.isFollowing ? "언팔로우" : "팔로우"}
@@ -249,7 +244,7 @@ const ProfilePostPage = () => {
             )}
           </div>
         </div>
-      </section>
+      </header>
 
       {/* 포스트 리스트 섹션 */}
       <section className="user-posts">

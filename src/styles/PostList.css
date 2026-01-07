@@ -150,6 +150,51 @@
   border-color: transparent;
 }
 
+.sns-btn-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(31, 41, 55, 0.92) 0%, rgba(17, 24, 39, 0.92) 100%);
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.18);
+}
+
+.sns-btn-secondary:hover {
+  box-shadow: 0 14px 28px rgba(2, 6, 23, 0.26);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* PostCreatePage 하단 액션 버튼: 스샷처럼 더 "두툼/그라데이션" 느낌으로 (다른 페이지 영향 최소화) */
+.post-create-page .sns-btn {
+  height: 48px;
+  border-radius: 14px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+.post-create-page .sns-btn-primary {
+  background: linear-gradient(180deg, #5b5cf6 0%, #3f39c9 100%);
+  box-shadow: 0 18px 34px rgba(79, 70, 229, 0.28);
+}
+
+.post-create-page .sns-btn-primary:hover {
+  box-shadow: 0 22px 44px rgba(79, 70, 229, 0.36);
+}
+
+.post-create-page .sns-btn-secondary {
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.94) 0%, rgba(2, 6, 23, 0.94) 100%);
+  box-shadow: 0 16px 32px rgba(2, 6, 23, 0.22);
+}
+
+.post-create-page .sns-btn-secondary:hover {
+  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.3);
+}
+
+/* Markdown 패널 헤더 버튼은 액션 버튼 행보다 조금 작게 */
+.post-create-page .markdown-preview-header .sns-btn {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 12px;
+}
+
 .post-list-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -231,22 +276,34 @@
 
 .post-list-search {
   margin: 14px 0 22px 0;
+  position: relative;
+  max-width: 520px;
+}
+
+.post-list-search .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 10px;
+  color: #9ca3af;
+  font-size: 14px;
+  z-index: 1;
 }
 
 .post-list-search-input {
   width: 100%;
-  max-width: 520px;
-  height: 42px;
-  padding: 0 14px;
+  height: 40px;
+  padding: 0 14px 0 40px;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
-  background: #fff;
+  background: #f8fafc;
   font-size: 14px;
+  font-weight: 500;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: all 0.2s;
 }
 
 .post-list-search-input:focus {
+  background: #fff;
   border-color: #c7d2fe;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }

@@ -701,14 +701,6 @@ const PostCreatePage = () => {
       }}
     >
       <div className="sns-container">
-        <div className="sns-hero-card">
-          <div className="sns-hero-badge">{isEditMode ? "게시글 수정" : "게시글 작성"}</div>
-          <div className="sns-hero-title">오늘은 어떤 이야기를 공유할까요?</div>
-          <div className="sns-hero-subtitle">
-            개발 경험, 트러블슈팅, 회고까지 — 이미지/마크다운도 바로 붙여넣을 수 있어요.
-          </div>
-        </div>
-
         <div className={`post-create-shell ${showMarkdown ? "with-markdown" : ""}`}>
           <div className="sns-surface auth-box post-create-left" style={{ maxWidth: "1200px" }}>
             <div className="auth-form">
@@ -839,7 +831,12 @@ const PostCreatePage = () => {
             {error && <p className="error-message">{error}</p>}
 
             <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
-              <button type="button" onClick={() => navigate(-1)} className="sns-btn" style={{ flex: 1 }}>
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="sns-btn sns-btn-secondary"
+                style={{ flex: 1 }}
+              >
                 취소
               </button>
               <button
@@ -855,7 +852,7 @@ const PostCreatePage = () => {
                 type="button"
                 onClick={handleToggleMarkdown}
                 disabled={!editor}
-                className="sns-btn"
+                className="sns-btn sns-btn-primary"
                 style={{ flex: 1 }}
               >
                 {showMarkdown ? "Markdown 닫기" : "Markdown 보기"}
@@ -872,7 +869,11 @@ const PostCreatePage = () => {
             <div className="markdown-preview post-create-right sns-surface">
               <div className="markdown-preview-header">
                 <div className="markdown-preview-title">현재 Markdown</div>
-                <button type="button" onClick={handleCopyMarkdown} className="sns-btn">
+                <button
+                  type="button"
+                  onClick={handleCopyMarkdown}
+                  className="sns-btn sns-btn-primary"
+                >
                   복사
                 </button>
               </div>

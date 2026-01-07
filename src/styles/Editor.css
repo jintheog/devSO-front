@@ -64,7 +64,7 @@
   }
 }
 
-.editor-toolbar {
+.post-create-page .editor-toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -72,38 +72,41 @@
   margin-bottom: 12px;
 }
 
-.editor-toolbar button {
-  border: 1px solid #ddd;
+.post-create-page .auth-form .editor-toolbar button {
+  border: 1px solid #e5e7eb;
   background: #fff;
-  color: #111; /* Auth.css의 button color(#fff) 오버라이드: 빈 박스처럼 보이던 문제 해결 */
+  color: #111827; /* Recruit/SNS 톤 */
   padding: 8px 10px;
   margin-top: 0; /* Auth.css의 margin-top 오버라이드 */
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 800;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease,
+    background 0.15s ease, color 0.15s ease;
 }
 
-.editor-toolbar button.active {
-  border-color: #007bff;
-  background: #007bff;
+.post-create-page .auth-form .editor-toolbar button.active {
+  border-color: transparent;
+  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
   color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 123, 255, 0.25);
+  box-shadow: 0 10px 22px rgba(79, 70, 229, 0.22);
 }
 
-.editor-toolbar button:disabled {
+.post-create-page .auth-form .editor-toolbar button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.editor-toolbar .editor-divider {
+.post-create-page .editor-toolbar .editor-divider {
   width: 1px;
   background: #e6e6e6;
   margin: 0 4px;
 }
 
-.editor-surface {
-  border: 1px solid #ddd;
-  border-radius: 10px;
+.post-create-page .editor-surface {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
   padding: 14px;
   min-height: 360px;
   background: #fff;
@@ -111,7 +114,7 @@
 }
 
 /* Tiptap 기본 편집 영역 */
-.editor-surface .ProseMirror {
+.post-create-page .editor-surface .ProseMirror {
   outline: none;
   font-size: 16px;
   line-height: 1.7;
@@ -283,8 +286,8 @@
 
 .markdown-preview {
   margin-top: 14px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
   padding: 12px;
   background: #fff;
 }
@@ -302,18 +305,18 @@
 }
 
 .markdown-preview-header button {
-  border: 1px solid #ddd;
-  background: #fff;
-  color: #111;
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 800;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease,
+    background 0.15s ease, color 0.15s ease;
 }
 
 .markdown-preview-header button:hover {
-  background: #f6f6f6;
+  border-color: rgba(79, 70, 229, 0.25);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.06);
 }
 
 .markdown-preview-header button:active {
@@ -321,7 +324,7 @@
 }
 
 .markdown-preview-header button:focus-visible {
-  outline: 2px solid rgba(0, 123, 255, 0.35);
+  outline: 2px solid rgba(79, 70, 229, 0.25);
   outline-offset: 2px;
 }
 

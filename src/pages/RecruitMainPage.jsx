@@ -188,23 +188,47 @@ const RecruitMainPage = () => {
 					</div>
 				</section>
 
-				<div className="recruit-filter-wrapper">
-					<RecruitFilterBar
-						options={options}
-						filter={filter}
-						setFilter={setFilter}
-						resetFilters={resetFilters}
-					/>
+				{/* SNS 탭과 동일한 디자인의 모집 구분 탭 */}
+				<div className="recruit-header-tabs">
+					<button
+						className={`recruit-header-tab ${!filter.type ? "active" : ""}`}
+						onClick={() => setFilter((prev) => ({ ...prev, type: null }))}
+					>
+						전체
+					</button>
+					{options.types.map((t) => {
+						const val = t && typeof t === "object" ? t.value : t;
+						const label = t && typeof t === "object" ? t.label : t;
+						return (
+							<button
+								key={val}
+								className={`recruit-header-tab ${
+									String(filter.type) === String(val) ? "active" : ""
+								}`}
+								onClick={() => setFilter((prev) => ({ ...prev, type: val }))}
+							>
+								{label}
+							</button>
+						);
+					})}
 				</div>
 
 				<div className="recruit-content" id="recruit-list">
+					{/* 기존 문구 대신 드랍다운 필터 바 배치 */}
+					<div className="recruit-filter-wrapper">
+						<RecruitFilterBar
+							options={options}
+							filter={filter}
+							setFilter={setFilter}
+							resetFilters={resetFilters}
+							showTabs={false} // 탭은 상단에서 따로 렌더링하므로 숨김 처리 (FilterBar 수정 필요)
+						/>
+					</div>
+
 					<div className="recruit-section-header">
 						<div className="recruit-section-title">
 							<div className="recruit-section-bar" />
-							<div>
-								<div className="recruit-section-name">최신 모집글</div>
-								<div className="recruit-section-desc">관심 있는 프로젝트를 찾아보세요.</div>
-							</div>
+							<div className="recruit-section-name">최신 모집글</div>
 						</div>
 						<div className="recruit-count">
 							총 <span>{totalElements}</span>개

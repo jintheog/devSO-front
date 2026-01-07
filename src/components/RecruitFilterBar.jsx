@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../styles/RecruitFilterBar.css";
 
-const RecruitFilterBar = ({ options, filter, setFilter, resetFilters }) => {
+const RecruitFilterBar = ({ options, filter, setFilter, resetFilters, showTabs = true }) => {
 	const {
-		types = [],
 		positions = [],
 		stacks = [],
 		progressTypes = [],
@@ -79,46 +78,31 @@ const RecruitFilterBar = ({ options, filter, setFilter, resetFilters }) => {
 
 	return (
 		<div className="filter-container">
-			<div className="type-tabs">
-				<div className="type-buttons-group">
-					<button
-						className={!filter.type ? "active" : ""}
-						onClick={() => handleFilterChange("type", null)}
-					>
-						전체
-					</button>
-					{types.map((t) => (
+			{showTabs && (
+				<div className="type-tabs">
+					<div className="type-buttons-group">
 						<button
-							key={getValue(t)}
-							className={
-								String(filter.type) === String(getValue(t)) ? "active" : ""
-							}
-							onClick={() => handleFilterChange("type", getValue(t))}
+							className={!filter.type ? "active" : ""}
+							onClick={() => handleFilterChange("type", null)}
 						>
-							{getLabel(t)}
+							전체
 						</button>
-					))}
+						{options.types.map((t) => (
+							<button
+								key={getValue(t)}
+								className={
+									String(filter.type) === String(getValue(t)) ? "active" : ""
+								}
+								onClick={() => handleFilterChange("type", getValue(t))}
+							>
+								{getLabel(t)}
+							</button>
+						))}
+					</div>
 				</div>
+			)}
 
-				<div className="search-bar">
-					<span className="search-icon">🔍</span>
-					<input
-						type="text"
-						placeholder="제목, 글 내용을 검색해보세요."
-						// 🌟 3. value와 onChange를 로컬 상태로 변경
-						value={localSearch}
-						onChange={(e) => setLocalSearch(e.target.value)}
-						// 엔터를 쳤을 때 즉시 검색하고 싶다면 아래 핸들러 추가 가능
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								setFilter((prev) => ({ ...prev, search: localSearch }));
-							}
-						}}
-					/>
-				</div>
-			</div>
-
-			<div className="filter-controls">
+			<div className="filter-controls" style={{ marginBottom: "16px" }}>
 				{/* 기술 스택 */}
 				<div className="dropdown-wrapper" ref={dropdownRef}>
 					<button
@@ -241,6 +225,21 @@ const RecruitFilterBar = ({ options, filter, setFilter, resetFilters }) => {
 					<span className="reset-icon">🔄</span>
 					초기화
 				</button>
+			</div>
+
+			<div className="search-bar" style={{ width: "100%", maxWidth: "none" }}>
+				<span className="search-icon">🔍</span>
+				<input
+					type="text"
+					placeholder="제목, 글 내용을 검색해보세요."
+					value={localSearch}
+					onChange={(e) => setLocalSearch(e.target.value)}
+					onKeyDown={(e) => {
+						if (e.key === "Enter") {
+							setFilter((prev) => ({ ...prev, search: localSearch }));
+						}
+					}}
+				/>
 			</div>
 		</div>
 	);
