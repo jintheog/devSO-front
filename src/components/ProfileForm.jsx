@@ -5,13 +5,12 @@ import Swal from "sweetalert2";
 
 const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-const ProfileForm = ({ 
-  initialData = {}, 
-  serverEmail, 
+const ProfileForm = ({
+  initialData = {},
+  serverEmail,
   onDataChange,
-  // 부모로부터 전달받은 상태
   emailCheckStatus,
-  setEmailCheckStatus
+  setEmailCheckStatus,
 }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -32,8 +31,7 @@ const ProfileForm = ({
       if (initialData.profileImageUrl) {
         setPreviewUrl(getImageUrl(initialData.profileImageUrl));
       }
-      
-      // 초기화 시 서버 원본 이메일과 동일하면 바로 'available' 처리
+
       if (initialData.email === serverEmail && serverEmail !== "") {
         setEmailCheckStatus("available");
       } else {
@@ -44,11 +42,13 @@ const ProfileForm = ({
 
   const handleEmailCheck = async () => {
     if (!formData.email) return;
-    
-    // 이메일 형식 검사 로직 추가 (선택사항)
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setErrors((prev) => ({ ...prev, email: "올바른 이메일 형식이 아닙니다." }));
+      setErrors((prev) => ({
+        ...prev,
+        email: "올바른 이메일 형식이 아닙니다.",
+      }));
       return;
     }
 
@@ -94,7 +94,6 @@ const ProfileForm = ({
     let errorMsg = "";
 
     if (name === "email") {
-      // 입력 중 서버 원본 이메일과 같아지면 다시 available, 다르면 none
       if (value === serverEmail && serverEmail !== "") {
         setEmailCheckStatus("available");
       } else {
@@ -130,6 +129,7 @@ const ProfileForm = ({
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
+      {/* 프로필 이미지 섹션 */}
       <div className="flex flex-col items-center space-y-4 md:w-1/3">
         <div
           className="relative group cursor-pointer w-40 h-40 rounded-full overflow-hidden border-4 border-gray-100 shadow-sm"
@@ -153,20 +153,28 @@ const ProfileForm = ({
         />
       </div>
 
+      {/* 입력 폼 섹션 */}
       <div className="flex-1 space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* 이름 - 이제 수정 가능합니다 */}
           <div className="space-y-1">
-            <label className="block text-sm font-semibold text-gray-700">이름</label>
+            <label className="block text-sm font-semibold text-gray-700">
+              이름
+            </label>
             <input
               type="text"
+              name="name"
               value={formData.name}
-              readOnly
-              className="w-full px-4 py-2 bg-gray-100 text-gray-500 border rounded-lg cursor-not-allowed outline-none"
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6c5ce7] outline-none transition-colors"
             />
           </div>
 
+          {/* 이메일 */}
           <div className="space-y-1">
-            <label className="block text-sm font-semibold text-gray-700">이메일</label>
+            <label className="block text-sm font-semibold text-gray-700">
+              이메일
+            </label>
             <div className="flex items-center gap-2">
               <input
                 type="email"
@@ -196,16 +204,23 @@ const ProfileForm = ({
                   {errors.email || "이미 사용 중인 이메일입니다."}
                 </p>
               ) : emailCheckStatus === "available" && formData.email ? (
-                <p className="text-green-600 text-xs mt-1">사용 가능한 이메일입니다.</p>
+                <p className="text-green-600 text-xs mt-1">
+                  사용 가능한 이메일입니다.
+                </p>
               ) : emailCheckStatus === "none" && formData.email ? (
-                <p className="text-gray-400 text-xs mt-1">중복 확인이 필요합니다.</p>
+                <p className="text-gray-400 text-xs mt-1">
+                  중복 확인이 필요합니다.
+                </p>
               ) : null}
             </div>
           </div>
         </div>
 
+        {/* 전화번호 */}
         <div className="space-y-1">
-          <label className="block text-sm font-semibold text-gray-700">전화번호</label>
+          <label className="block text-sm font-semibold text-gray-700">
+            전화번호
+          </label>
           <input
             type="text"
             name="phone"
@@ -216,8 +231,11 @@ const ProfileForm = ({
           />
         </div>
 
+        {/* 포트폴리오 */}
         <div className="space-y-1">
-          <label className="block text-sm font-semibold text-gray-700">포트폴리오 / SNS 링크</label>
+          <label className="block text-sm font-semibold text-gray-700">
+            포트폴리오 / SNS 링크
+          </label>
           <input
             type="text"
             name="portfolio"

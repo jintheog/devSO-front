@@ -148,7 +148,7 @@ const ProfilePage = () => {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
                 <div className="flex flex-col md:flex-row md:items-end gap-3">
                   <h1 className="text-4xl font-black">
-                    {profileData.name || profileData.username}
+                    {profileData.name}
                   </h1>
                   <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-1">
                     {profileData.email && (

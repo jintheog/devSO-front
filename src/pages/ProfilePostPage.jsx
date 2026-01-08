@@ -224,7 +224,7 @@ const ProfilePostPage = () => {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
                 <div className="flex flex-col md:flex-row md:items-end gap-3">
                   <h1 className="text-4xl font-black">
-                    {profileData?.name || profileData?.username}
+                    {profileData.name}
                   </h1>
                   <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-bold backdrop-blur-sm mb-1">
                     📧 {profileData.email || "No Email"}
