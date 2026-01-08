@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext"; // useAuth 임포트 확인
 import {
   getProfile,
   updateProfile,
@@ -18,10 +18,10 @@ import "../styles/PostList.css";
 
 const ProfileEditPage = () => {
   const navigate = useNavigate();
-  const { user: currentUser } = useAuth();
+  // 핵심: setUser를 추가로 가져옵니다.
+  const { user: currentUser, setUser } = useAuth(); 
   const [loading, setLoading] = useState(true);
 
-  // 이메일 중복 확인 상태 관리 (none, checking, available, duplicate)
   const [emailCheckStatus, setEmailCheckStatus] = useState("available");
 
   const [profileData, setProfileData] = useState({
@@ -59,7 +59,6 @@ const ProfileEditPage = () => {
           
           setServerEmail(data.email || ""); 
           setEmailCheckStatus("available");
-
           setEducations(data.educations || []);
           setCareers(data.careers || []);
           setActivities(data.activities || []);
@@ -80,7 +79,6 @@ const ProfileEditPage = () => {
     }
   }, [currentUser]);
 
-  // 자기소개 핸들러 (500자 제한 로직 포함)
   const handleBioChange = (e) => {
     const value = e.target.value;
     if (value.length <= 500) {
@@ -153,7 +151,18 @@ const ProfileEditPage = () => {
       const totalData = { ...profileData, educations, careers, activities, certis, skills };
       try {
         Swal.fire({ title: "저장 중...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        
+        // 1. 서버 데이터 업데이트
         await updateProfile(currentUser.username, totalData);
+        
+        // 2. 핵심: RootLayout(네비바)에 반영하기 위해 AuthContext 유저 상태 업데이트
+        // 기존 유저 정보에 새로운 이름과 프로필 이미지를 덮어씌웁니다.
+        setUser((prev) => ({
+          ...prev,
+          name: profileData.name,
+          profileImageUrl: profileData.profileImageUrl
+        }));
+
         Swal.close();
         await Swal.fire({ icon: "success", title: "저장 완료!", timer: 1500, showConfirmButton: false });
         navigate(`/profile/${currentUser.username}`);
@@ -182,7 +191,6 @@ const ProfileEditPage = () => {
     <div className="sns-page">
       <div className="sns-container">
         <div className="max-w-5xl mx-auto font-sans">
-          {/* 히로 섹션 */}
           <div className="sns-hero-card">
             <div className="sns-hero-badge">내 프로필 관리</div>
             <h1 className="sns-hero-title">나의 전문성을<br />기록하고 공유하세요</h1>
@@ -193,7 +201,6 @@ const ProfileEditPage = () => {
           </div>
 
           <div className="grid grid-cols-1 gap-8">
-            {/* 기본 정보 섹션 */}
             <section className="sns-surface p-8">
               <div className="flex items-center gap-2 mb-6">
                 <div className="w-1.5 h-6 bg-indigo-600 rounded-full"></div>
@@ -208,7 +215,6 @@ const ProfileEditPage = () => {
               />
             </section>
 
-            {/* 학력/경력 등 상세 섹션 */}
             <section className="sns-surface p-8">
               <div className="flex items-center gap-2 mb-6">
                 <div className="w-1.5 h-6 bg-indigo-600 rounded-full"></div>
@@ -249,7 +255,6 @@ const ProfileEditPage = () => {
               <SkillsForm initialData={skills} options={{ stacks: stackOptions }} onDataChange={setSkills} />
             </section>
 
-            {/* 자기소개 섹션 - AI 기능 강조 */}
             <section className="sns-surface p-8 border-2 border-indigo-50 bg-indigo-50/10">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                 <div>
@@ -291,7 +296,6 @@ const ProfileEditPage = () => {
             </section>
           </div>
 
-          {/* 하단 플로팅 액션 바 느낌의 버튼 영역 */}
           <div className="flex justify-end items-center gap-4 mt-16 mb-24 pt-8 border-t border-gray-200">
             <button 
               className="px-10 py-3.5 rounded-xl font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all"
